@@ -1,6 +1,6 @@
 package com.survivors.mygame;
 
-public class EnemyType {
+public class EnemyData {
 
     /**
      * I think this should only need the String of the enemy's type and then
@@ -10,7 +10,7 @@ public class EnemyType {
      *
      * @param enemyTypeName The word for the type of the enemy to be created.
      */
-    public EnemyType(String enemyTypeName) {
+    public EnemyData(String enemyTypeName) {
 
     }
 }
