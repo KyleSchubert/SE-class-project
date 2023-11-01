@@ -22,22 +22,22 @@ public class MyGame extends ApplicationAdapter {
         world = new World(new Vector2(0, 0), true); // new Vector2(0, 0)  -  because we don't want gravity
         batch = new SpriteBatch();
         // NOTE: IN LIBGDX, POINT (0, 0) IS LOCATED AT THE BOTTOM LEFT, FOR THE DEFAULT CAMERA POSITION
-        testEnemy = new Enemy(Enemy.EnemyTypeName.BIRD, 60, 80); // THEN INITIALIZE HERE
+        testEnemy = new Enemy(Character.CharacterTypeName.BIRD, 60, 80); // THEN INITIALIZE HERE
 
-        testEnemy2 = new Enemy(Enemy.EnemyTypeName.ORANGE_MUSHROOM, 120, 140); // THEN INITIALIZE HERE
+        testEnemy2 = new Enemy(Character.CharacterTypeName.ORANGE_MUSHROOM, 120, 140); // THEN INITIALIZE HERE
         // Default state is   Enemy.EnemyState.STANDING
 
-        testEnemy3 = new Enemy(Enemy.EnemyTypeName.ORANGE_MUSHROOM, 220, 140); // THEN INITIALIZE HERE
-        testEnemy3.setState(Enemy.EnemyState.MOVING); // SET STATES LIKE THIS
+        testEnemy3 = new Enemy(Character.CharacterTypeName.ORANGE_MUSHROOM, 220, 140); // THEN INITIALIZE HERE
+        testEnemy3.setState(Character.CharacterState.MOVING); // SET STATES LIKE THIS
 
-        testEnemy4 = new Enemy(Enemy.EnemyTypeName.ORANGE_MUSHROOM, 320, 140); // THEN INITIALIZE HERE
-        testEnemy4.setState(Enemy.EnemyState.DYING); // SET STATES LIKE THIS
+        testEnemy4 = new Enemy(Character.CharacterTypeName.ORANGE_MUSHROOM, 320, 140); // THEN INITIALIZE HERE
+        testEnemy4.setState(Character.CharacterState.DYING); // SET STATES LIKE THIS
 
-        testEnemy5 = new Enemy(Enemy.EnemyTypeName.BIRD, 60, 180); // THEN INITIALIZE HERE
-        testEnemy5.setState(Enemy.EnemyState.DYING); // SET STATES LIKE THIS
+        testEnemy5 = new Enemy(Character.CharacterTypeName.BIRD, 60, 180); // THEN INITIALIZE HERE
+        testEnemy5.setState(Character.CharacterState.DYING); // SET STATES LIKE THIS
 
-        testEnemy6 = new Enemy(Enemy.EnemyTypeName.BIRD, 60, 280); // THEN INITIALIZE HERE
-        testEnemy6.setState(Enemy.EnemyState.MOVING); // SET STATES LIKE THIS
+        testEnemy6 = new Enemy(Character.CharacterTypeName.BIRD, 60, 280); // THEN INITIALIZE HERE
+        testEnemy6.setState(Character.CharacterState.MOVING); // SET STATES LIKE THIS
         /*
         The enemy images are set up in such a way that the origin of each monster will always
             be on the bottom and middle of the actual enemy drawing part of each sprite
