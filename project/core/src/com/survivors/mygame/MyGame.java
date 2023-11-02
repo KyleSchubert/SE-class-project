@@ -2,6 +2,8 @@ package com.survivors.mygame;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
@@ -12,6 +14,8 @@ public class MyGame extends ApplicationAdapter {
     World world;
     SpriteBatch batch;
     PhysicsShapeCache physicsShapeCache;
+    OrthographicCamera camera;
+    Texture theFLoor;
     Enemy testEnemy; // ALWAYS DECLARE HERE
     Enemy testEnemy2; // ALWAYS DECLARE HERE
     Enemy testEnemy3; // ALWAYS DECLARE HERE
@@ -25,6 +29,15 @@ public class MyGame extends ApplicationAdapter {
         world = new World(new Vector2(0, 0), true); // new Vector2(0, 0)  -  because we don't want gravity
         physicsShapeCache = new PhysicsShapeCache("physics.xml");
         batch = new SpriteBatch();
+
+        float windowWidth = Gdx.graphics.getWidth();
+        float windowHeight = Gdx.graphics.getHeight();
+
+        camera = new OrthographicCamera(windowWidth, windowHeight);
+        camera.position.set(720, 450, 0);
+        camera.update();
+
+        theFLoor = new Texture("testFloor1.png");
         // NOTE: IN LIBGDX, POINT (0, 0) IS LOCATED AT THE BOTTOM LEFT, FOR THE DEFAULT CAMERA POSITION
         testEnemy = new Enemy(Character.CharacterTypeName.BIRD, 60, 80, world, physicsShapeCache); // THEN INITIALIZE HERE
 
@@ -60,7 +73,14 @@ public class MyGame extends ApplicationAdapter {
     public void render() {
         float elapsedTime = stepWorld();
         ScreenUtils.clear(0, 0, 0, 1);
+        camera.position.set(playerCharacter.getX(), playerCharacter.getY(), 0);
+        camera.update();
+        batch.setProjectionMatrix(camera.combined);
         batch.begin();
+        batch.draw(theFLoor,
+                playerCharacter.getX() - 2160, playerCharacter.getY() - 1350,
+                (int) playerCharacter.getX(), -(int) playerCharacter.getY(),
+                4320, 2700);
         testEnemy.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
         testEnemy2.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
         testEnemy3.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
