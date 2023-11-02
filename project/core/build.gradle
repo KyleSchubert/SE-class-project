@@ -1,6 +1,9 @@
 sourceCompatibility = 1.7
+dependencies {
+    implementation 'com.codeandweb.physicseditor:gdx-pe-loader:1.1.0'
+}
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
-sourceSets.main.java.srcDirs = [ "src/" ]
+sourceSets.main.java.srcDirs = ["src/"]
 
 eclipse.project.name = appName + "-core"

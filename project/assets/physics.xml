@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- created with https://www.codeandweb.com/physicseditor -->
+<bodydef>
+
+	<body name="bird">
+		<is_dynamic/>
+		<linear_damping>0</linear_damping>
+		<angular_damping>0</angular_damping>
+		<allow_sleep/>
+	</body>
+
+	<body name="blue mushroom">
+		<is_dynamic/>
+		<linear_damping>0</linear_damping>
+		<angular_damping>0</angular_damping>
+		<allow_sleep/>
+	</body>
+
+	<body name="helmet penguin">
+		<is_dynamic/>
+		<linear_damping>0</linear_damping>
+		<angular_damping>0</angular_damping>
+		<allow_sleep/>
+	</body>
+
+	<body name="orange mushroom">
+		<is_dynamic/>
+		<linear_damping>0</linear_damping>
+		<angular_damping>0</angular_damping>
+		<allow_sleep/>
+	</body>
+
+	<body name="pig">
+		<is_dynamic/>
+		<linear_damping>0</linear_damping>
+		<angular_damping>0</angular_damping>
+		<allow_sleep/>
+	</body>
+
+	<body name="plant">
+		<is_dynamic/>
+		<linear_damping>0</linear_damping>
+		<angular_damping>0</angular_damping>
+		<allow_sleep/>
+	</body>
+
+	<body name="small penguin">
+		<is_dynamic/>
+		<linear_damping>0</linear_damping>
+		<angular_damping>0</angular_damping>
+		<allow_sleep/>
+	</body>
+
+	<body name="spear penguin">
+		<is_dynamic/>
+		<linear_damping>0</linear_damping>
+		<angular_damping>0</angular_damping>
+		<allow_sleep/>
+	</body>
+
+	<body name="stump">
+		<is_dynamic/>
+		<linear_damping>0</linear_damping>
+		<angular_damping>0</angular_damping>
+		<allow_sleep/>
+	</body>
+
+	<body name="zombie penguin">
+		<is_dynamic/>
+		<linear_damping>0</linear_damping>
+		<angular_damping>0</angular_damping>
+		<allow_sleep/>
+	</body>
+
+	<metadata>
+		<format>1</format>
+		<ptm_ratio>32</ptm_ratio>
+	</metadata>
+
+</bodydef>
+

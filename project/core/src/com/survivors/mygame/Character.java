@@ -3,6 +3,8 @@ package com.survivors.mygame;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.physics.box2d.World;
+import com.codeandweb.physicseditor.PhysicsShapeCache;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,11 +20,9 @@ public class Character extends Mobile {
     }
 
     private final CharacterData characterData; // This exclusively contains the information that will not change about the specific character.
-    private CharacterState state = CharacterState.STANDING;
+    private CharacterState state;
     private float frameTime = 0;
     private int frame = 0;
-    private int x;
-    private int y;
     /**
      * All frames are in the same structure accessible by index, so from stateFrameStartIndex TO stateFrameEndIndex,
      * the frames and frame delays of the specific character's current state (like STANDING or MOVING) can be found.
@@ -30,16 +30,16 @@ public class Character extends Mobile {
      */
     private int stateFrameStartIndex = 0;
     private int stateFrameEndIndex = 0;
+    private int isFacingLeft = 1;
 
     /**
      * @param characterTypeName The type of the character that will be created. This is an enum: CharacterTypeName
      * @param x                 The x coordinate of the spawning position of the Character.
      * @param y                 The y coordinate of the spawning position of the Character.
      */
-    public Character(CharacterTypeName characterTypeName, int x, int y) {
+    public Character(CharacterTypeName characterTypeName, int x, int y, World world, PhysicsShapeCache physicsShapeCache) {
         this.characterData = new CharacterData(characterTypeName);
-        this.x = x;
-        this.y = y;
+        this.makeBody(x, y, 0, world, physicsShapeCache);
         this.setState(CharacterState.STANDING);
     }
 
@@ -47,13 +47,15 @@ public class Character extends Mobile {
      * @param state The state of the character that you want it to be changed to. Ex: Character.CharacterState.MOVING
      */
     public void setState(CharacterState state) {
-        if (state == CharacterState.ATTACKING && !this.characterData.canAttack) {
-            return;
-        } else {
-            this.state = state;
+        if (!state.equals(this.state)) {
+            if (state == CharacterState.ATTACKING && !this.characterData.canAttack) {
+                return;
+            } else {
+                this.state = state;
+            }
+            prepareFrameStartAndEndIndex();
+            this.frame = this.stateFrameEndIndex;
         }
-        prepareFrameStartAndEndIndex();
-        this.frame = this.stateFrameEndIndex;
     }
 
     private void prepareFrameStartAndEndIndex() {
@@ -98,10 +100,19 @@ public class Character extends Mobile {
         }
 
         batch.draw(this.characterData.allAnimationFrames[this.frame],
-                this.x - this.characterData.originX, this.y - (this.characterData.dimensionY - this.characterData.originY),
-                this.characterData.dimensionX, this.characterData.dimensionY);
+                this.getX() - this.characterData.originX, this.getY() - (this.characterData.dimensionY - this.characterData.originY),
+                this.characterData.originX, this.characterData.originY,
+                this.characterData.dimensionX, this.characterData.dimensionY,
+                isFacingLeft, 1, 0);
     }
 
+    public void faceRight() {
+        this.isFacingLeft = -1;
+    }
+
+    public void faceLeft() {
+        this.isFacingLeft = 1;
+    }
 
     /**
      * CharacterData:
@@ -133,8 +144,6 @@ public class Character extends Mobile {
         private int standingAnimationEndFrameIndex;
         private int attackingAnimationStartFrameIndex;
         private int attackingAnimationEndFrameIndex;
-
-        // Still need to decide on how the shape for collision will be handled and what data structure sort of thing that will require. I'm thinking squares for all enemies.
 
         /**
          * I think this should only need the String of the character's type and then

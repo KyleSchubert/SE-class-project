@@ -1,5 +1,8 @@
 package com.survivors.mygame;
 
+import com.badlogic.gdx.physics.box2d.World;
+import com.codeandweb.physicseditor.PhysicsShapeCache;
+
 public class Enemy extends Character {
     // Relies on player position
     // Will be tangible
@@ -9,8 +12,8 @@ public class Enemy extends Character {
      * @param x                 The x coordinate of the spawning position of the Enemy.
      * @param y                 The y coordinate of the spawning position of the Enemy.
      */
-    public Enemy(CharacterTypeName characterTypeName, int x, int y) {
-        super(characterTypeName, x, y);
+    public Enemy(CharacterTypeName characterTypeName, int x, int y, World world, PhysicsShapeCache physicsShapeCache) {
+        super(characterTypeName, x, y, world, physicsShapeCache);
     }
 
 }
