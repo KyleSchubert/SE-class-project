@@ -15,7 +15,7 @@ public class MyGame extends ApplicationAdapter {
     SpriteBatch batch;
     PhysicsShapeCache physicsShapeCache;
     OrthographicCamera camera;
-    Texture theFLoor;
+    Texture theFloor;
     Enemy testEnemy; // ALWAYS DECLARE HERE
     Enemy testEnemy2; // ALWAYS DECLARE HERE
     Enemy testEnemy3; // ALWAYS DECLARE HERE
@@ -37,7 +37,7 @@ public class MyGame extends ApplicationAdapter {
         camera.position.set(720, 450, 0);
         camera.update();
 
-        theFLoor = new Texture("testFloor1.png");
+        theFloor = new Texture("testFloor1.png");
         // NOTE: IN LIBGDX, POINT (0, 0) IS LOCATED AT THE BOTTOM LEFT, FOR THE DEFAULT CAMERA POSITION
         testEnemy = new Enemy(Character.CharacterTypeName.BIRD, 60, 80, world, physicsShapeCache); // THEN INITIALIZE HERE
 
@@ -77,7 +77,7 @@ public class MyGame extends ApplicationAdapter {
         camera.update();
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
-        batch.draw(theFLoor,
+        batch.draw(theFloor,
                 playerCharacter.getX() - 2160, playerCharacter.getY() - 1350,
                 (int) playerCharacter.getX(), -(int) playerCharacter.getY(),
                 4320, 2700);
@@ -95,6 +95,8 @@ public class MyGame extends ApplicationAdapter {
     public void dispose() {
         batch.dispose();
         world.dispose();
+        theFloor.dispose();
+        physicsShapeCache.dispose();
     }
 
     // START SUGGESTED CODE FROM -> https://www.codeandweb.com/physicseditor/tutorials/libgdx-physics
