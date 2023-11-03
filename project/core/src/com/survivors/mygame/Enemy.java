@@ -12,8 +12,40 @@ public class Enemy extends Character {
      * @param x                 The x coordinate of the spawning position of the Enemy.
      * @param y                 The y coordinate of the spawning position of the Enemy.
      */
-    public Enemy(CharacterTypeName characterTypeName, float x, float y, World world, PhysicsShapeCache physicsShapeCache) {
-        super(characterTypeName, x, y, world, physicsShapeCache);
+
+    // Nick: inUse represents whether the enemy is currently in use by a pool
+    boolean inUse;
+
+    /* Nick: oldwave represents whether this enemy is part of an old wave
+     *       of enemies, and thus needs to be phased out next time it goes off-screen
+     */
+    boolean oldwave = false;
+
+    /* Nick: constructor now always passes VOID typename when creating
+     *       a new enemy, as it will default to this state in the pool
+     *       while being considered for use
+     */
+    public Enemy(float x, float y, World world, PhysicsShapeCache physicsShapeCache) {
+        super(Character.CharacterTypeName.VOID, x, y, world, physicsShapeCache);
+        inUse = false;
+        oldwave = false;
     }
+
+    /* Nick: This method should be called when getting a new enemy from a pool;
+     *       it is basically super()
+     */
+    public void init(CharacterTypeName characterTypeName, float x, float y, World world, PhysicsShapeCache physicsShapeCache) {
+        this.characterData = new CharacterData(characterTypeName);
+        this.makeBody(x, y, 0, world, physicsShapeCache);
+        this.setState(CharacterState.STANDING);
+        inUse = true;
+        oldwave = false;
+    }
+
+    // Nick: This method is called by Pool.free() whenever an enemy instance is freed
+    public void reset() {
+        inUse = false;
+    }
+
 
 }

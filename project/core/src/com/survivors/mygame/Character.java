@@ -18,10 +18,15 @@ public class Character extends Mobile {
     }
 
     public enum CharacterTypeName {
-        BIRD, PLANT, STUMP, PIG, ORANGE_MUSHROOM, BLUE_MUSHROOM, ZOMBIE_MUSHROOM, HELMET_PENGUIN, SPEAR_PENGUIN, SMALL_PENGUIN
+        // Nick: Added the VOID typename to denote a newly created enemy in a pool before use
+        BIRD, PLANT, STUMP, PIG, ORANGE_MUSHROOM, BLUE_MUSHROOM, ZOMBIE_MUSHROOM, HELMET_PENGUIN, SPEAR_PENGUIN, SMALL_PENGUIN, VOID
     }
 
-    private final CharacterData characterData; // This exclusively contains the information that will not change about the specific character.
+    /* Nick: I made characterData public and changable, as pool objects will
+     *       have their attributes changed upon being used, instead of having
+     *       a new constructor called each time
+     */
+    public CharacterData characterData; // This exclusively contains the information that will not change about the specific character.
     private CharacterState state;
     private float frameTime = 0;
     private int frame = 0;
@@ -43,6 +48,10 @@ public class Character extends Mobile {
         this.characterData = new CharacterData(characterTypeName);
         this.makeBody(x, y, 0, world, physicsShapeCache);
         this.setState(CharacterState.STANDING);
+    }
+
+    public CharacterState getState() {
+        return state;
     }
 
     /**
@@ -116,6 +125,7 @@ public class Character extends Mobile {
     public void faceLeft() {
         this.isFacingLeft = 1;
     }
+
 
     /**
      * CharacterData:
@@ -260,6 +270,9 @@ public class Character extends Mobile {
                     this.dimensionX = 94;
                     this.dimensionY = 62;
                     break;
+                // Nick: placeholder internal name for a void enemy
+                case VOID:
+                    this.internalName = "void";
                 default:
                     System.out.println("Why was an character almost generated with no matching type name? characterTypeName:  " + characterTypeName);
                     return;

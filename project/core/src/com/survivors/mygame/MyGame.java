@@ -11,6 +11,12 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.codeandweb.physicseditor.PhysicsShapeCache;
 
+// Nick's imports
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
+
+import static com.survivors.mygame.Character.CharacterState.DYING;
+
 public class MyGame extends ApplicationAdapter {
     /**
      * Because Box 2D has a speed limit of "2 meters per frame," which is actually
@@ -25,12 +31,36 @@ public class MyGame extends ApplicationAdapter {
     PhysicsShapeCache physicsShapeCache;
     OrthographicCamera camera;
     Texture theFloor;
-    Enemy testEnemy; // ALWAYS DECLARE HERE
+
+    // Nick: moved these to global range to be used efficiently in isOutOfCamera()
+    static float windowWidth = Gdx.graphics.getWidth();
+    static float windowHeight = Gdx.graphics.getHeight();
+    static float viewWidth = windowWidth * SCALE_FACTOR;
+    static float viewHeight = windowHeight * SCALE_FACTOR;
+
+    /* Nick: Kyle's test enemies
+    Enemy testEnemy;  // ALWAYS DECLARE HERE
     Enemy testEnemy2; // ALWAYS DECLARE HERE
     Enemy testEnemy3; // ALWAYS DECLARE HERE
     Enemy testEnemy4; // ALWAYS DECLARE HERE
     Enemy testEnemy5; // ALWAYS DECLARE HERE
     Enemy testEnemy6; // ALWAYS DECLARE HERE
+    */
+
+    // Nick: GDX's Array class
+    private Array<Enemy> activeEnemies = new Array<Enemy>();
+
+    /* Nick: GDX's Pool class for reusing class instances instead of
+     *       constantly destroying and recreating them
+     */
+    private final Pool<Enemy> enemyPool = new Pool<Enemy>() {
+        @Override
+        protected Enemy newObject() {
+            return new Enemy(0.0f, 0.0f, world, physicsShapeCache);
+        }
+    };
+
+
     PlayerCharacter playerCharacter;
 
     @Override
@@ -39,35 +69,18 @@ public class MyGame extends ApplicationAdapter {
         physicsShapeCache = new PhysicsShapeCache("physics.xml");
         batch = new SpriteBatch();
 
-        float windowWidth = Gdx.graphics.getWidth();
-        float windowHeight = Gdx.graphics.getHeight();
 
-        camera = new OrthographicCamera(windowWidth * SCALE_FACTOR, windowHeight * SCALE_FACTOR);
+        /* Nick: moved these declarations to global range within MyGame (see above)
+         * float windowWidth  = Gdx.graphics.getWidth();
+         * float windowHeight = Gdx.graphics.getHeight();
+         */
 
-        viewport = new ExtendViewport(Gdx.graphics.getWidth() * SCALE_FACTOR, Gdx.graphics.getHeight() * SCALE_FACTOR, camera);
+        camera = new OrthographicCamera(viewWidth, viewHeight);
+
+        viewport = new ExtendViewport(viewWidth, viewHeight, camera);
         theFloor = new Texture("testFloor1.png");
 
         theFloor.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
-        // NOTE: IN LIBGDX, POINT (0, 0) IS LOCATED AT THE BOTTOM LEFT, FOR THE DEFAULT CAMERA POSITION
-        testEnemy = new Enemy(Character.CharacterTypeName.BIRD, 3.2f, 4.2f, world, physicsShapeCache); // THEN INITIALIZE HERE
-
-        testEnemy2 = new Enemy(Character.CharacterTypeName.ORANGE_MUSHROOM, 6, 7, world, physicsShapeCache); // THEN INITIALIZE HERE
-        // Default state is   Enemy.EnemyState.STANDING
-
-        testEnemy3 = new Enemy(Character.CharacterTypeName.ORANGE_MUSHROOM, 11, 7, world, physicsShapeCache); // THEN INITIALIZE HERE
-        testEnemy3.setState(Character.CharacterState.MOVING); // SET STATES LIKE THIS
-        testEnemy3.move(1, 0, 90);
-
-        testEnemy4 = new Enemy(Character.CharacterTypeName.ORANGE_MUSHROOM, 16, 7, world, physicsShapeCache); // THEN INITIALIZE HERE
-        testEnemy4.setState(Character.CharacterState.DYING); // SET STATES LIKE THIS
-
-        testEnemy5 = new Enemy(Character.CharacterTypeName.BIRD, 3, 9, world, physicsShapeCache); // THEN INITIALIZE HERE
-        testEnemy5.setState(Character.CharacterState.DYING); // SET STATES LIKE THIS
-
-        testEnemy6 = new Enemy(Character.CharacterTypeName.BIRD, 3, 14, world, physicsShapeCache); // THEN INITIALIZE HERE
-        testEnemy6.setState(Character.CharacterState.MOVING); // SET STATES LIKE THIS
-        testEnemy6.faceRight();
-        testEnemy6.move(3, 1, 6); // Movement as a vector. It gets normalized and then scaled
 
         playerCharacter = new PlayerCharacter(36, 23, world, physicsShapeCache);
         /*
@@ -78,6 +91,18 @@ public class MyGame extends ApplicationAdapter {
             Its origin will be in the bottom middle, so for its jumping frame it
             will be slightly below and actually detached from its body by appearance.
          */
+    }
+
+    /* Nick: checks for enemies that can be removed from activeEnemies[] and thus
+     *       returned to the pool, whether they are dead or offscreen & from an old wave
+     */
+    public void update() {
+        for (int i = 0; i < activeEnemies.size; i++) {
+            if (activeEnemies.get(i).getState() == DYING || isOutofCamera(activeEnemies.get(i), playerCharacter) && activeEnemies.get(i).oldwave) {
+                activeEnemies.removeIndex(i);
+            }
+        }
+
     }
 
     @Override
@@ -98,12 +123,13 @@ public class MyGame extends ApplicationAdapter {
                 4320, 2700,
                 false, false
         );
-        testEnemy.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
-        testEnemy2.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
-        testEnemy3.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
-        testEnemy4.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
-        testEnemy5.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
-        testEnemy6.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
+
+        // Nick: animate each enemy in current list pulled from the pool
+        for (Enemy E : activeEnemies) {
+            E.animate(batch, elapsedTime);
+        }
+
+
         playerCharacter.animate(batch, elapsedTime);
         batch.end();
     }
@@ -135,11 +161,13 @@ public class MyGame extends ApplicationAdapter {
         accumulator += Math.min(delta, 0.25f);
         if (accumulator >= STEP_TIME) {
             accumulator -= STEP_TIME;
+            /* Nick: commented out this test enemy code
             if (testEnemy3.getX() >= 30) {
                 testEnemy3.move(-2, 1, 90);
             } else if (testEnemy3.getX() <= 10) {
                 testEnemy3.move(2, -1, 90);
             }
+            */
             // Do keyChecks here
             playerCharacter.keyCheck();
             //
@@ -150,4 +178,15 @@ public class MyGame extends ApplicationAdapter {
         }
     }
     // END SUGGESTED CODE FROM -> https://www.codeandweb.com/physicseditor/tutorials/libgdx-physics
+
+
+    // Nick: tells if a given character (C) is out-of-view of the camera, relative to player (P)
+    public static boolean isOutofCamera(Character C, Character P) {
+        return (Math.abs(C.getX() - P.getX()) > viewWidth / 2) || (Math.abs(C.getY() - P.getY()) > viewHeight / 2);
+    }
+
+    //  viewWidth
+    //  viewHeight
+
 }
+
