@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.codeandweb.physicseditor.PhysicsShapeCache;
@@ -28,7 +29,12 @@ public class MyGame extends ApplicationAdapter {
     PhysicsShapeCache physicsShapeCache;
     OrthographicCamera camera;
     Texture theFloor;
+    public static final Array<CharacterData> ALL_CHARACTER_DATA = new Array<>();
     Box2DDebugRenderer debugRenderer;
+    private static final float windowWidth = 1440;
+    private static final float windowHeight = 920;
+    private static final float viewWidth = windowWidth * SCALE_FACTOR;
+    private static final float viewHeight = windowHeight * SCALE_FACTOR;
     Enemy testEnemy; // ALWAYS DECLARE HERE
     Enemy testEnemy2; // ALWAYS DECLARE HERE
     Enemy testEnemy3; // ALWAYS DECLARE HERE
@@ -44,12 +50,14 @@ public class MyGame extends ApplicationAdapter {
         physicsShapeCache = new PhysicsShapeCache("physics.xml");
         batch = new SpriteBatch();
 
-        float windowWidth = Gdx.graphics.getWidth();
-        float windowHeight = Gdx.graphics.getHeight();
+        // Loading in each CharacterTypeName's CharacterData into allCharacterData
+        for (Character.CharacterTypeName name : Character.CharacterTypeName.values()) {
+            ALL_CHARACTER_DATA.add(new CharacterData(name));
+        }
 
-        camera = new OrthographicCamera(windowWidth * SCALE_FACTOR, windowHeight * SCALE_FACTOR);
+        camera = new OrthographicCamera(viewWidth, viewHeight);
 
-        viewport = new ExtendViewport(Gdx.graphics.getWidth() * SCALE_FACTOR, Gdx.graphics.getHeight() * SCALE_FACTOR, camera);
+        viewport = new ExtendViewport(viewWidth, viewHeight, camera);
         theFloor = new Texture("testFloor1.png");
 
         theFloor.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
@@ -144,8 +152,8 @@ public class MyGame extends ApplicationAdapter {
         testEnemy4.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
         testEnemy5.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
         testEnemy6.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
-        for (int i = 0; i < enemies.size(); i++) {
-            enemies.get(i).animate(batch, elapsedTime);
+        for (Enemy enemy : enemies) {
+            enemy.animate(batch, elapsedTime);
         }
         playerCharacter.animate(batch, elapsedTime);
         batch.end();

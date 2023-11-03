@@ -14,7 +14,6 @@ public class Mobile {
         if (this.body != null) {
             world.destroyBody(this.body);
         }
-        // TODO: TEMPORARILY making all bodies just be the bird's body. Will change once we draw the shapes in PhysicsEditor
         Body body = physicsShapeCache.createBody(name, world, SCALE_FACTOR, SCALE_FACTOR);
         body.setTransform(x, y, angle);
         this.body = body;
