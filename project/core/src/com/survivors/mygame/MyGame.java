@@ -8,9 +8,18 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.codeandweb.physicseditor.PhysicsShapeCache;
 
 public class MyGame extends ApplicationAdapter {
+    /**
+     * Because Box 2D has a speed limit of "2 meters per frame," which is actually
+     * very small because a "meter" is only a few pixels, we need to increase the speed limit.
+     * The SCALE_FACTOR can let the speed limit go higher by making everything "smaller."
+     * There is no other way to increase the speed limit without breaking anything.
+     */
+    public static final float SCALE_FACTOR = 0.05f;
+    ExtendViewport viewport;
     World world;
     SpriteBatch batch;
     PhysicsShapeCache physicsShapeCache;
@@ -33,32 +42,34 @@ public class MyGame extends ApplicationAdapter {
         float windowWidth = Gdx.graphics.getWidth();
         float windowHeight = Gdx.graphics.getHeight();
 
-        camera = new OrthographicCamera(windowWidth, windowHeight);
-        camera.position.set(720, 450, 0);
-        camera.update();
+        camera = new OrthographicCamera(windowWidth * SCALE_FACTOR, windowHeight * SCALE_FACTOR);
 
+        viewport = new ExtendViewport(Gdx.graphics.getWidth() * SCALE_FACTOR, Gdx.graphics.getHeight() * SCALE_FACTOR, camera);
         theFloor = new Texture("testFloor1.png");
-        // NOTE: IN LIBGDX, POINT (0, 0) IS LOCATED AT THE BOTTOM LEFT, FOR THE DEFAULT CAMERA POSITION
-        testEnemy = new Enemy(Character.CharacterTypeName.BIRD, 60, 80, world, physicsShapeCache); // THEN INITIALIZE HERE
 
-        testEnemy2 = new Enemy(Character.CharacterTypeName.ORANGE_MUSHROOM, 120, 140, world, physicsShapeCache); // THEN INITIALIZE HERE
+        theFloor.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
+        // NOTE: IN LIBGDX, POINT (0, 0) IS LOCATED AT THE BOTTOM LEFT, FOR THE DEFAULT CAMERA POSITION
+        testEnemy = new Enemy(Character.CharacterTypeName.BIRD, 3.2f, 4.2f, world, physicsShapeCache); // THEN INITIALIZE HERE
+
+        testEnemy2 = new Enemy(Character.CharacterTypeName.ORANGE_MUSHROOM, 6, 7, world, physicsShapeCache); // THEN INITIALIZE HERE
         // Default state is   Enemy.EnemyState.STANDING
 
-        testEnemy3 = new Enemy(Character.CharacterTypeName.ORANGE_MUSHROOM, 220, 140, world, physicsShapeCache); // THEN INITIALIZE HERE
+        testEnemy3 = new Enemy(Character.CharacterTypeName.ORANGE_MUSHROOM, 11, 7, world, physicsShapeCache); // THEN INITIALIZE HERE
         testEnemy3.setState(Character.CharacterState.MOVING); // SET STATES LIKE THIS
+        testEnemy3.move(1, 0, 90);
 
-        testEnemy4 = new Enemy(Character.CharacterTypeName.ORANGE_MUSHROOM, 320, 140, world, physicsShapeCache); // THEN INITIALIZE HERE
+        testEnemy4 = new Enemy(Character.CharacterTypeName.ORANGE_MUSHROOM, 16, 7, world, physicsShapeCache); // THEN INITIALIZE HERE
         testEnemy4.setState(Character.CharacterState.DYING); // SET STATES LIKE THIS
 
-        testEnemy5 = new Enemy(Character.CharacterTypeName.BIRD, 60, 180, world, physicsShapeCache); // THEN INITIALIZE HERE
+        testEnemy5 = new Enemy(Character.CharacterTypeName.BIRD, 3, 9, world, physicsShapeCache); // THEN INITIALIZE HERE
         testEnemy5.setState(Character.CharacterState.DYING); // SET STATES LIKE THIS
 
-        testEnemy6 = new Enemy(Character.CharacterTypeName.BIRD, 60, 280, world, physicsShapeCache); // THEN INITIALIZE HERE
+        testEnemy6 = new Enemy(Character.CharacterTypeName.BIRD, 3, 14, world, physicsShapeCache); // THEN INITIALIZE HERE
         testEnemy6.setState(Character.CharacterState.MOVING); // SET STATES LIKE THIS
         testEnemy6.faceRight();
-        testEnemy6.move(3, 1, 512); // Movement as a vector. It gets normalized and then scaled
+        testEnemy6.move(3, 1, 6); // Movement as a vector. It gets normalized and then scaled
 
-        playerCharacter = new PlayerCharacter(720, 450, world, physicsShapeCache);
+        playerCharacter = new PlayerCharacter(36, 23, world, physicsShapeCache);
         /*
         The enemy images are set up in such a way that the origin of each monster will always
             be on the bottom and middle of the actual enemy drawing part of each sprite
@@ -78,9 +89,15 @@ public class MyGame extends ApplicationAdapter {
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
         batch.draw(theFloor,
-                playerCharacter.getX() - 2160, playerCharacter.getY() - 1350,
-                (int) playerCharacter.getX(), -(int) playerCharacter.getY(),
-                4320, 2700);
+                playerCharacter.getX() - 2160 * SCALE_FACTOR, playerCharacter.getY() - 1350 * SCALE_FACTOR,
+                0, 0,
+                4320, 2700,
+                SCALE_FACTOR, SCALE_FACTOR,
+                0,
+                (int) (playerCharacter.getX() * 1 / SCALE_FACTOR), -(int) (playerCharacter.getY() * 1 / SCALE_FACTOR),
+                4320, 2700,
+                false, false
+        );
         testEnemy.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
         testEnemy2.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
         testEnemy3.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
@@ -90,6 +107,13 @@ public class MyGame extends ApplicationAdapter {
         playerCharacter.animate(batch, elapsedTime);
         batch.end();
     }
+
+    @Override
+    public void resize(int width, int height) {
+        viewport.update(width, height, true);
+        batch.setProjectionMatrix(camera.combined);
+    }
+
 
     @Override
     public void dispose() {
@@ -111,6 +135,11 @@ public class MyGame extends ApplicationAdapter {
         accumulator += Math.min(delta, 0.25f);
         if (accumulator >= STEP_TIME) {
             accumulator -= STEP_TIME;
+            if (testEnemy3.getX() >= 30) {
+                testEnemy3.move(-2, 1, 90);
+            } else if (testEnemy3.getX() <= 10) {
+                testEnemy3.move(2, -1, 90);
+            }
             // Do keyChecks here
             playerCharacter.keyCheck();
             //

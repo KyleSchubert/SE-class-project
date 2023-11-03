@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
+import static com.survivors.mygame.MyGame.SCALE_FACTOR;
+
 public class Character extends Mobile {
     public enum CharacterState {
         DYING, MOVING, STANDING, ATTACKING
@@ -37,7 +39,7 @@ public class Character extends Mobile {
      * @param x                 The x coordinate of the spawning position of the Character.
      * @param y                 The y coordinate of the spawning position of the Character.
      */
-    public Character(CharacterTypeName characterTypeName, int x, int y, World world, PhysicsShapeCache physicsShapeCache) {
+    public Character(CharacterTypeName characterTypeName, float x, float y, World world, PhysicsShapeCache physicsShapeCache) {
         this.characterData = new CharacterData(characterTypeName);
         this.makeBody(x, y, 0, world, physicsShapeCache);
         this.setState(CharacterState.STANDING);
@@ -100,10 +102,11 @@ public class Character extends Mobile {
         }
 
         batch.draw(this.characterData.allAnimationFrames[this.frame],
-                this.getX() - this.characterData.originX, this.getY() - (this.characterData.dimensionY - this.characterData.originY),
-                this.characterData.originX, this.characterData.originY,
+                this.getX() - this.characterData.originX * isFacingLeft * SCALE_FACTOR,
+                this.getY() - (this.characterData.dimensionY - this.characterData.originY) * SCALE_FACTOR,
+                0, 0,
                 this.characterData.dimensionX, this.characterData.dimensionY,
-                isFacingLeft, 1, 0);
+                isFacingLeft * SCALE_FACTOR, 1 * SCALE_FACTOR, 0);
     }
 
     public void faceRight() {

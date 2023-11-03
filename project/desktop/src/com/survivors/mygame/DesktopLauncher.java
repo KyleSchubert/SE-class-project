@@ -8,7 +8,7 @@ import com.survivors.mygame.MyGame;
 public class DesktopLauncher {
     public static void main(String[] arg) {
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
-        config.setWindowedMode(1440, 900); // 1440x900 looks kind of OK
+        config.setWindowedMode(1440, 920); // 1440x920 looks kind of OK
         config.useVsync(true);
         config.setForegroundFPS(60);
         config.setTitle("Survivors");

@@ -12,7 +12,7 @@ public class Enemy extends Character {
      * @param x                 The x coordinate of the spawning position of the Enemy.
      * @param y                 The y coordinate of the spawning position of the Enemy.
      */
-    public Enemy(CharacterTypeName characterTypeName, int x, int y, World world, PhysicsShapeCache physicsShapeCache) {
+    public Enemy(CharacterTypeName characterTypeName, float x, float y, World world, PhysicsShapeCache physicsShapeCache) {
         super(characterTypeName, x, y, world, physicsShapeCache);
     }
 

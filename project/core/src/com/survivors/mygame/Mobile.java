@@ -5,6 +5,8 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.World;
 import com.codeandweb.physicseditor.PhysicsShapeCache;
 
+import static com.survivors.mygame.MyGame.SCALE_FACTOR;
+
 public class Mobile {
     private Body body;
 
@@ -13,7 +15,7 @@ public class Mobile {
             world.destroyBody(this.body);
         }
         // TODO: TEMPORARILY making all bodies just be the bird's body. Will change once we draw the shapes in PhysicsEditor
-        Body body = physicsShapeCache.createBody("bird", world, 1, 1);
+        Body body = physicsShapeCache.createBody("bird", world, SCALE_FACTOR, SCALE_FACTOR);
         body.setTransform(x, y, angle);
         this.body = body;
     }

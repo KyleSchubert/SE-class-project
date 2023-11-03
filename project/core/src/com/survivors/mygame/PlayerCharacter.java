@@ -8,7 +8,7 @@ import com.codeandweb.physicseditor.PhysicsShapeCache;
 import java.util.ArrayList;
 
 public class PlayerCharacter extends Character {
-    private int movementSpeed = 256;
+    private int movementSpeed = 64;
     // Will be tangible
     // Requires keyboard control input
 
@@ -21,7 +21,7 @@ public class PlayerCharacter extends Character {
      * @param x The x coordinate of the spawning position of the Enemy.
      * @param y The y coordinate of the spawning position of the Enemy.
      */
-    public PlayerCharacter(int x, int y, World world, PhysicsShapeCache physicsShapeCache) {
+    public PlayerCharacter(float x, float y, World world, PhysicsShapeCache physicsShapeCache) {
         super(CharacterTypeName.HELMET_PENGUIN, x, y, world, physicsShapeCache);
     }
 
