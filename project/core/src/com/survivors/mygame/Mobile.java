@@ -10,12 +10,12 @@ import static com.survivors.mygame.MyGame.SCALE_FACTOR;
 public class Mobile {
     private Body body;
 
-    public final void makeBody(float x, float y, float angle, World world, PhysicsShapeCache physicsShapeCache) {
+    public final void makeBody(String name, float x, float y, float angle, World world, PhysicsShapeCache physicsShapeCache) {
         if (this.body != null) {
             world.destroyBody(this.body);
         }
         // TODO: TEMPORARILY making all bodies just be the bird's body. Will change once we draw the shapes in PhysicsEditor
-        Body body = physicsShapeCache.createBody("bird", world, SCALE_FACTOR, SCALE_FACTOR);
+        Body body = physicsShapeCache.createBody(name, world, SCALE_FACTOR, SCALE_FACTOR);
         body.setTransform(x, y, angle);
         this.body = body;
     }

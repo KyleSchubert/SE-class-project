@@ -41,7 +41,7 @@ public class Character extends Mobile {
      */
     public Character(CharacterTypeName characterTypeName, float x, float y, World world, PhysicsShapeCache physicsShapeCache) {
         this.characterData = new CharacterData(characterTypeName);
-        this.makeBody(x, y, 0, world, physicsShapeCache);
+        this.makeBody(this.characterData.internalName, x, y, 0, world, physicsShapeCache);
         this.setState(CharacterState.STANDING);
     }
 

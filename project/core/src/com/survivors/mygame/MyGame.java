@@ -6,10 +6,13 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.codeandweb.physicseditor.PhysicsShapeCache;
+
+import java.util.ArrayList;
 
 public class MyGame extends ApplicationAdapter {
     /**
@@ -25,6 +28,7 @@ public class MyGame extends ApplicationAdapter {
     PhysicsShapeCache physicsShapeCache;
     OrthographicCamera camera;
     Texture theFloor;
+    Box2DDebugRenderer debugRenderer;
     Enemy testEnemy; // ALWAYS DECLARE HERE
     Enemy testEnemy2; // ALWAYS DECLARE HERE
     Enemy testEnemy3; // ALWAYS DECLARE HERE
@@ -32,6 +36,7 @@ public class MyGame extends ApplicationAdapter {
     Enemy testEnemy5; // ALWAYS DECLARE HERE
     Enemy testEnemy6; // ALWAYS DECLARE HERE
     PlayerCharacter playerCharacter;
+    ArrayList<Enemy> enemies;
 
     @Override
     public void create() {
@@ -48,6 +53,8 @@ public class MyGame extends ApplicationAdapter {
         theFloor = new Texture("testFloor1.png");
 
         theFloor.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
+
+        debugRenderer = new Box2DDebugRenderer();
         // NOTE: IN LIBGDX, POINT (0, 0) IS LOCATED AT THE BOTTOM LEFT, FOR THE DEFAULT CAMERA POSITION
         testEnemy = new Enemy(Character.CharacterTypeName.BIRD, 3.2f, 4.2f, world, physicsShapeCache); // THEN INITIALIZE HERE
 
@@ -59,10 +66,12 @@ public class MyGame extends ApplicationAdapter {
         testEnemy3.move(1, 0, 90);
 
         testEnemy4 = new Enemy(Character.CharacterTypeName.ORANGE_MUSHROOM, 16, 7, world, physicsShapeCache); // THEN INITIALIZE HERE
-        testEnemy4.setState(Character.CharacterState.DYING); // SET STATES LIKE THIS
+        testEnemy4.setState(Character.CharacterState.MOVING); // SET STATES LIKE THIS
+        testEnemy4.faceRight();
 
         testEnemy5 = new Enemy(Character.CharacterTypeName.BIRD, 3, 9, world, physicsShapeCache); // THEN INITIALIZE HERE
-        testEnemy5.setState(Character.CharacterState.DYING); // SET STATES LIKE THIS
+        testEnemy5.setState(Character.CharacterState.MOVING); // SET STATES LIKE THIS
+        testEnemy5.faceRight();
 
         testEnemy6 = new Enemy(Character.CharacterTypeName.BIRD, 3, 14, world, physicsShapeCache); // THEN INITIALIZE HERE
         testEnemy6.setState(Character.CharacterState.MOVING); // SET STATES LIKE THIS
@@ -70,6 +79,37 @@ public class MyGame extends ApplicationAdapter {
         testEnemy6.move(3, 1, 6); // Movement as a vector. It gets normalized and then scaled
 
         playerCharacter = new PlayerCharacter(36, 23, world, physicsShapeCache);
+
+
+        enemies = new ArrayList<>();
+        int x = 40;
+        int y = -10;
+        for (Character.CharacterTypeName name : Character.CharacterTypeName.values()) {
+            for (int i = 0; i < 6; i++) {
+                enemies.add(new Enemy(name, x, y, world, physicsShapeCache));
+                if (i == 1) {
+                    enemies.get(enemies.size() - 1).setState(Character.CharacterState.MOVING);
+                } else if (i == 2) {
+                    enemies.get(enemies.size() - 1).setState(Character.CharacterState.DYING);
+                } else if (i == 3) {
+                    enemies.get(enemies.size() - 1).faceRight();
+                } else if (i == 4) {
+                    enemies.get(enemies.size() - 1).setState(Character.CharacterState.MOVING);
+                    enemies.get(enemies.size() - 1).faceRight();
+                } else if (i == 5) {
+                    enemies.get(enemies.size() - 1).setState(Character.CharacterState.DYING);
+                    enemies.get(enemies.size() - 1).faceRight();
+                }
+                if (x < 80) {
+                    x += 8;
+                } else {
+                    y += 6;
+                    x = 40;
+                }
+            }
+        }
+
+
         /*
         The enemy images are set up in such a way that the origin of each monster will always
             be on the bottom and middle of the actual enemy drawing part of each sprite
@@ -104,8 +144,14 @@ public class MyGame extends ApplicationAdapter {
         testEnemy4.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
         testEnemy5.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
         testEnemy6.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
+        for (int i = 0; i < enemies.size(); i++) {
+            enemies.get(i).animate(batch, elapsedTime);
+        }
         playerCharacter.animate(batch, elapsedTime);
         batch.end();
+
+        // DEBUG WIREFRAME:
+        debugRenderer.render(world, camera.combined);
     }
 
     @Override
