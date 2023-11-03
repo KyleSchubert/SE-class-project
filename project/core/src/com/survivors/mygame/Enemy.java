@@ -35,7 +35,7 @@ public class Enemy extends Character {
      *       it is basically super()
      */
     public void init(CharacterTypeName characterTypeName, float x, float y, World world, PhysicsShapeCache physicsShapeCache) {
-        this.characterData = new CharacterData(characterTypeName);
+        this.dataIndex = characterTypeName.ordinal();
         this.makeBody(x, y, 0, world, physicsShapeCache);
         this.setState(CharacterState.STANDING);
         inUse = true;

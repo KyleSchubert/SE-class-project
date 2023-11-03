@@ -31,12 +31,13 @@ public class MyGame extends ApplicationAdapter {
     PhysicsShapeCache physicsShapeCache;
     OrthographicCamera camera;
     Texture theFloor;
+    public static final Array<CharacterData> ALL_CHARACTER_DATA = new Array<>();
 
     // Nick: moved these to global range to be used efficiently in isOutOfCamera()
-    static float windowWidth = Gdx.graphics.getWidth();
-    static float windowHeight = Gdx.graphics.getHeight();
-    static float viewWidth = windowWidth * SCALE_FACTOR;
-    static float viewHeight = windowHeight * SCALE_FACTOR;
+    private static final float windowWidth = 1440;
+    private static final float windowHeight = 920;
+    private static final float viewWidth = windowWidth * SCALE_FACTOR;
+    private static final float viewHeight = windowHeight * SCALE_FACTOR;
 
     /* Nick: Kyle's test enemies
     Enemy testEnemy;  // ALWAYS DECLARE HERE
@@ -48,7 +49,7 @@ public class MyGame extends ApplicationAdapter {
     */
 
     // Nick: GDX's Array class
-    private Array<Enemy> activeEnemies = new Array<Enemy>();
+    private Array<Enemy> activeEnemies = new Array<>();
 
     /* Nick: GDX's Pool class for reusing class instances instead of
      *       constantly destroying and recreating them
@@ -69,6 +70,10 @@ public class MyGame extends ApplicationAdapter {
         physicsShapeCache = new PhysicsShapeCache("physics.xml");
         batch = new SpriteBatch();
 
+        // Loading in each CharacterTypeName's CharacterData into allCharacterData
+        for (Character.CharacterTypeName name : Character.CharacterTypeName.values()) {
+            ALL_CHARACTER_DATA.add(new CharacterData(name));
+        }
 
         /* Nick: moved these declarations to global range within MyGame (see above)
          * float windowWidth  = Gdx.graphics.getWidth();
