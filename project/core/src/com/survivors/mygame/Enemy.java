@@ -13,13 +13,10 @@ public class Enemy extends Character {
      * @param y                 The y coordinate of the spawning position of the Enemy.
      */
 
-    // Nick: inUse represents whether the enemy is currently in use by a pool
-    boolean inUse;
-
-    /* Nick: oldwave represents whether this enemy is part of an old wave
+    /* Nick: fromOldWave represents whether this enemy is part of an old wave
      *       of enemies, and thus needs to be phased out next time it goes off-screen
      */
-    boolean oldwave = false;
+    boolean fromOldWave = false;
 
     /* Nick: constructor now always passes VOID typename when creating
      *       a new enemy, as it will default to this state in the pool
@@ -27,8 +24,7 @@ public class Enemy extends Character {
      */
     public Enemy(float x, float y, World world, PhysicsShapeCache physicsShapeCache) {
         super(Character.CharacterTypeName.VOID, x, y, world, physicsShapeCache);
-        inUse = false;
-        oldwave = false;
+        fromOldWave = false;
     }
 
     /* Nick: This method should be called when getting a new enemy from a pool;
@@ -38,13 +34,11 @@ public class Enemy extends Character {
         this.dataIndex = characterTypeName.ordinal();
         this.makeBody(x, y, 0, world, physicsShapeCache);
         this.setState(CharacterState.STANDING);
-        inUse = true;
-        oldwave = false;
+        fromOldWave = false;
     }
 
-    // Nick: This method is called by Pool.free() whenever an enemy instance is freed
+    // Nick: Automatically called by Pool.free() whenever an enemy instance is freed
     public void reset() {
-        inUse = false;
     }
 
 

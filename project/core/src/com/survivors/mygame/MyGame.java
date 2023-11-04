@@ -39,6 +39,12 @@ public class MyGame extends ApplicationAdapter {
     private static final float viewWidth = windowWidth * SCALE_FACTOR;
     private static final float viewHeight = windowHeight * SCALE_FACTOR;
 
+    /* Nick: this should keep track of how much time has passed in the player's current
+     *       playthrough of a level (aka total time - menu time - pause time), for the
+     *       purpose of initiating waves at the proper point of the level
+     */
+    public float timeElapsedInGame = 0.0f;
+
     /* Nick: Kyle's test enemies
     Enemy testEnemy;  // ALWAYS DECLARE HERE
     Enemy testEnemy2; // ALWAYS DECLARE HERE
@@ -48,7 +54,6 @@ public class MyGame extends ApplicationAdapter {
     Enemy testEnemy6; // ALWAYS DECLARE HERE
     */
 
-    // Nick: GDX's Array class
     private Array<Enemy> activeEnemies = new Array<>();
 
     /* Nick: GDX's Pool class for reusing class instances instead of
@@ -60,6 +65,9 @@ public class MyGame extends ApplicationAdapter {
             return new Enemy(0.0f, 0.0f, world, physicsShapeCache);
         }
     };
+
+    // Nick: Wave data can probably be gotten from a file to pass to WaveList constructor
+    private WaveList theWaveList;
 
 
     PlayerCharacter playerCharacter;
@@ -98,17 +106,6 @@ public class MyGame extends ApplicationAdapter {
          */
     }
 
-    /* Nick: checks for enemies that can be removed from activeEnemies[] and thus
-     *       returned to the pool, whether they are dead or offscreen & from an old wave
-     */
-    public void update() {
-        for (int i = 0; i < activeEnemies.size; i++) {
-            if (activeEnemies.get(i).getState() == DYING || isOutofCamera(activeEnemies.get(i), playerCharacter) && activeEnemies.get(i).oldwave) {
-                activeEnemies.removeIndex(i);
-            }
-        }
-
-    }
 
     @Override
     public void render() {
@@ -133,7 +130,6 @@ public class MyGame extends ApplicationAdapter {
         for (Enemy E : activeEnemies) {
             E.animate(batch, elapsedTime);
         }
-
 
         playerCharacter.animate(batch, elapsedTime);
         batch.end();
@@ -166,6 +162,17 @@ public class MyGame extends ApplicationAdapter {
         accumulator += Math.min(delta, 0.25f);
         if (accumulator >= STEP_TIME) {
             accumulator -= STEP_TIME;
+
+            /* Nick: each frame we want to:
+             *       1) check for enemies to remove and return to pool,
+             *       2) attempt to add new enemies to activeEnemies[] from the pool, using current wave as a guide,
+             *       3) increment timeElapsedInGame if player is in a level and unpaused
+             */
+            removeStaleEnemies();
+            addNewEnemies();
+            // SHOULD only increment when player is in a level and unpaused
+            timeElapsedInGame += delta;
+
             /* Nick: commented out this test enemy code
             if (testEnemy3.getX() >= 30) {
                 testEnemy3.move(-2, 1, 90);
@@ -185,13 +192,48 @@ public class MyGame extends ApplicationAdapter {
     // END SUGGESTED CODE FROM -> https://www.codeandweb.com/physicseditor/tutorials/libgdx-physics
 
 
+    /* Nick: This method finds all enemies to be removed (and thus freeing up pool space)
+     *       by finding each enemy instance that is either dead or both from a previous
+     *       wave and offscreen. It uses a list of indices of enemies to remove because
+     *       removing by element from an array is unpredictable (removes the first element
+     *       in the array equal to the thing we're removing).
+     *
+     *       In the future I may want to have each enemy tell a global array when said enemy
+     *       dies, this way we don't need to loop through every enemy in-game every frame. */
+    public void removeStaleEnemies() {
+
+        Array<Integer> indicesToRemove = new Array<>();
+
+        int curIndex = 0;
+        for (Enemy E : activeEnemies) {
+            if (E.getState() == DYING || isOutofCamera(E, playerCharacter) && E.fromOldWave) {
+                indicesToRemove.add(curIndex);
+            }
+            curIndex++;
+        }
+
+        // removing from right-to-left so indices stay intact
+        for (int i = indicesToRemove.size - 1; i >= 0; i--) {
+            enemyPool.free(activeEnemies.items[indicesToRemove.items[i]]);
+            activeEnemies.removeIndex(indicesToRemove.items[i]);
+        }
+    }
+
+    /* Nick: this method attempts to add a new enemy to the game from the current wave.
+     *       It communicates with a WaveList instance to get the ID of the next enemy
+     *       to be added to the game, takes an enemy from the pool, and uses this
+     *       enemy's init() function to assign to it it's proper stats and location
+     *       somewhere outside of the player's view.
+     *
+     *       In the future I may add an algorithm to add multiple enemies during a single
+     *       frame, but not sure how to go about this yet */
+    public void addNewEnemies() {
+
+    }
+
     // Nick: tells if a given character (C) is out-of-view of the camera, relative to player (P)
     public static boolean isOutofCamera(Character C, Character P) {
         return (Math.abs(C.getX() - P.getX()) > viewWidth / 2) || (Math.abs(C.getY() - P.getY()) > viewHeight / 2);
     }
-
-    //  viewWidth
-    //  viewHeight
-
 }
 
