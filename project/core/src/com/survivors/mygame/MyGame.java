@@ -4,13 +4,21 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.codeandweb.physicseditor.PhysicsShapeCache;
 
 import java.util.ArrayList;
@@ -23,11 +31,20 @@ public class MyGame extends ApplicationAdapter {
      * There is no other way to increase the speed limit without breaking anything.
      */
     public static final float SCALE_FACTOR = 0.05f;
-    ExtendViewport viewport;
+    ScreenViewport viewport;
     World world;
     SpriteBatch batch;
     PhysicsShapeCache physicsShapeCache;
     OrthographicCamera camera;
+    ScreenViewport viewportForStage;
+    Stage stage;
+    public int amountOfCurrency;
+    BitmapFont font;
+    Image currencyCounterImage;
+    ImageButton playButton;
+    ImageButton upgradesButton;
+    ImageButton settingsButton;
+    ImageButton exitButton;
     Texture theFloor;
     public static final Array<CharacterData> ALL_CHARACTER_DATA = new Array<>();
     Box2DDebugRenderer debugRenderer;
@@ -57,12 +74,115 @@ public class MyGame extends ApplicationAdapter {
 
         camera = new OrthographicCamera(viewWidth, viewHeight);
 
-        viewport = new ExtendViewport(viewWidth, viewHeight, camera);
+        viewport = new ScreenViewport(camera);
+        viewport.setUnitsPerPixel(SCALE_FACTOR);
+
         theFloor = new Texture("testFloor1.png");
 
         theFloor.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
 
         debugRenderer = new Box2DDebugRenderer();
+
+        // For the UI and menus
+        viewportForStage = new ScreenViewport(camera);
+        viewportForStage.setUnitsPerPixel(SCALE_FACTOR);
+        stage = new Stage(viewportForStage);
+
+        Gdx.input.setInputProcessor(stage);
+
+        // Load the in-game currency counter
+        amountOfCurrency = 0;
+        currencyCounterImage = new Image(new Texture(Gdx.files.internal("ITEMS/doubloon.png")));
+        currencyCounterImage.setSize(29 * SCALE_FACTOR, 30 * SCALE_FACTOR);
+        stage.addActor(currencyCounterImage);
+        font = new BitmapFont(Gdx.files.internal("font.fnt"), false);
+        font.setUseIntegerPositions(false);
+        font.getData().setScale(SCALE_FACTOR, SCALE_FACTOR);
+
+        // Menu buttons below
+        // PLAY button
+        playButton = new ImageButton(
+                new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("MENU BUTTONS/play/default.png")))),
+                new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("MENU BUTTONS/play/hover.png"))))
+        );
+        playButton.setSize(362 * SCALE_FACTOR, 122 * SCALE_FACTOR);
+        playButton.addListener(new InputListener() {
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                System.out.println("CLICKED UP");
+                amountOfCurrency++;
+            }
+
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                System.out.println("CLICKED DOWN");
+                return true;
+            }
+        });
+        stage.addActor(playButton);
+
+        // UPGRADES button
+        upgradesButton = new ImageButton(
+                new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("MENU BUTTONS/upgrades/default.png")))),
+                new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("MENU BUTTONS/upgrades/hover.png"))))
+        );
+        upgradesButton.setSize(248 * SCALE_FACTOR, 72 * SCALE_FACTOR);
+        upgradesButton.addListener(new InputListener() {
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                System.out.println("CLICKED UP");
+                amountOfCurrency += 10;
+            }
+
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                System.out.println("CLICKED DOWN");
+                return true;
+            }
+        });
+        stage.addActor(upgradesButton);
+
+        // SETTINGS button
+        settingsButton = new ImageButton(
+                new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("MENU BUTTONS/settings/default.png")))),
+                new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("MENU BUTTONS/settings/hover.png"))))
+        );
+        settingsButton.setSize(224 * SCALE_FACTOR, 72 * SCALE_FACTOR);
+        settingsButton.addListener(new InputListener() {
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                System.out.println("CLICKED UP");
+                amountOfCurrency += 100;
+            }
+
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                System.out.println("CLICKED DOWN");
+                return true;
+            }
+        });
+        stage.addActor(settingsButton);
+
+        // EXIT button
+        exitButton = new ImageButton(
+                new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("MENU BUTTONS/exit/default.png")))),
+                new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("MENU BUTTONS/exit/hover.png"))))
+        );
+        exitButton.setSize(152 * SCALE_FACTOR, 72 * SCALE_FACTOR);
+        exitButton.addListener(new InputListener() {
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                Gdx.app.exit();
+                System.exit(-1);
+            }
+
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                return true;
+            }
+        });
+        stage.addActor(exitButton);
+
         // NOTE: IN LIBGDX, POINT (0, 0) IS LOCATED AT THE BOTTOM LEFT, FOR THE DEFAULT CAMERA POSITION
         testEnemy = new Enemy(Character.CharacterTypeName.BIRD, 3.2f, 4.2f, world, physicsShapeCache); // THEN INITIALIZE HERE
 
@@ -135,6 +255,7 @@ public class MyGame extends ApplicationAdapter {
         camera.position.set(playerCharacter.getX(), playerCharacter.getY(), 0);
         camera.update();
         batch.setProjectionMatrix(camera.combined);
+        viewport.apply();
         batch.begin();
         batch.draw(theFloor,
                 playerCharacter.getX() - 2160 * SCALE_FACTOR, playerCharacter.getY() - 1350 * SCALE_FACTOR,
@@ -156,8 +277,19 @@ public class MyGame extends ApplicationAdapter {
             enemy.animate(batch, elapsedTime);
         }
         playerCharacter.animate(batch, elapsedTime);
+        font.draw(batch, "x " + amountOfCurrency, playerCharacter.getX() - 19.2f, playerCharacter.getY() - 9.7f); // text for currency counter
         batch.end();
 
+        // MOVE THE MENU BUTTONS, or we could prevent the player from being moved
+        stage.getActors().get(0).setPosition(playerCharacter.getX() - 21, playerCharacter.getY() - 11); // currencyCounterImage
+        stage.getActors().get(1).setPosition(playerCharacter.getX() - 35, playerCharacter.getY() - 7); // playButton
+        stage.getActors().get(2).setPosition(playerCharacter.getX() - 35, playerCharacter.getY() - 12); // upgradesButton
+        stage.getActors().get(3).setPosition(playerCharacter.getX() - 35, playerCharacter.getY() - 17); // settingsButton
+        stage.getActors().get(4).setPosition(playerCharacter.getX() - 35, playerCharacter.getY() - 22); // exitButton
+
+        stage.getViewport().apply();
+        stage.act(elapsedTime);
+        stage.draw();
         // DEBUG WIREFRAME:
         debugRenderer.render(world, camera.combined);
     }
@@ -165,6 +297,7 @@ public class MyGame extends ApplicationAdapter {
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height, true);
+        stage.getViewport().update(width, height, true);
         batch.setProjectionMatrix(camera.combined);
     }
 
@@ -175,6 +308,8 @@ public class MyGame extends ApplicationAdapter {
         world.dispose();
         theFloor.dispose();
         physicsShapeCache.dispose();
+        stage.dispose();
+        font.dispose();
     }
 
     // START SUGGESTED CODE FROM -> https://www.codeandweb.com/physicseditor/tutorials/libgdx-physics
