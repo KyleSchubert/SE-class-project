@@ -50,7 +50,6 @@ public class Character extends Mobile {
 
     public Character() {
         this.dataIndex = CharacterTypeName.VOID.ordinal();
-        this.setState(CharacterState.STANDING);
     }
 
     public CharacterState getState() {
