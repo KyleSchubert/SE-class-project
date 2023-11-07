@@ -15,6 +15,8 @@ import com.codeandweb.physicseditor.PhysicsShapeCache;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
+import java.util.Random;
+
 import static com.survivors.mygame.Character.CharacterState.DYING;
 
 public class MyGame extends ApplicationAdapter {
@@ -38,6 +40,12 @@ public class MyGame extends ApplicationAdapter {
     private static final float windowHeight = 920;
     private static final float viewWidth = windowWidth * SCALE_FACTOR;
     private static final float viewHeight = windowHeight * SCALE_FACTOR;
+
+    /* Nick: Represents the size of the area outside the camera at which enemies
+     *       can spawn; 0.5 means the area's width and height extends out from the
+     *       camera edges by 0.5 * the camera width and height, respectively
+     */
+    private final float enemySpawnSize = 0.5f;
 
     /* Nick: this should keep track of how much time has passed in the player's current
      *       playthrough of a level (aka total time - menu time - pause time), for the
@@ -69,6 +77,8 @@ public class MyGame extends ApplicationAdapter {
     // Nick: Wave data can probably be gotten from a file to pass to WaveList constructor
     private WaveList theWaveList;
 
+    // Currently used to spawn enemies in a random location just outside of player's view
+    Random rand = new Random();
 
     PlayerCharacter playerCharacter;
 
@@ -163,13 +173,30 @@ public class MyGame extends ApplicationAdapter {
         if (accumulator >= STEP_TIME) {
             accumulator -= STEP_TIME;
 
-            /* Nick: each frame we want to:
-             *       1) check for enemies to remove and return to pool,
+            /* Nick: each frame (if in a game and unpaused) we want to:
+             *       1) check for enemies to remove and return to the pool,
              *       2) attempt to add new enemies to activeEnemies[] from the pool, using current wave as a guide,
-             *       3) increment timeElapsedInGame if player is in a level and unpaused
+             *       3) Check to see if the next wave is ready to begin
+             *             a) if next wave is ready, mark all enemies that are from previous waves
+             *       4) increment timeElapsedInGame if player is in a level and unpaused
              */
+
+            // Part 1)
             removeStaleEnemies();
+            // Part 2)
             addNewEnemies();
+            // Part 3)
+            // if it is time to advance to the next wave:
+            if (theWaveList.advanceWave(timeElapsedInGame)) {
+                // mark all active enemies that are from old waves
+                int curWave = theWaveList.getCurWave();
+                for (Enemy E : activeEnemies) {
+                    if (E.getSpawnedWave() < curWave)
+                        E.markOldWave();
+                }
+            }
+
+            // Part 4)
             // SHOULD only increment when player is in a level and unpaused
             timeElapsedInGame += delta;
 
@@ -206,7 +233,7 @@ public class MyGame extends ApplicationAdapter {
 
         int curIndex = 0;
         for (Enemy E : activeEnemies) {
-            if (E.getState() == DYING || isOutofCamera(E, playerCharacter) && E.fromOldWave) {
+            if (E.getState() == DYING || isOutofCamera(E, playerCharacter) && E.fromOldWave()) {
                 indicesToRemove.add(curIndex);
             }
             curIndex++;
@@ -222,13 +249,42 @@ public class MyGame extends ApplicationAdapter {
     /* Nick: this method attempts to add a new enemy to the game from the current wave.
      *       It communicates with a WaveList instance to get the ID of the next enemy
      *       to be added to the game, takes an enemy from the pool, and uses this
-     *       enemy's init() function to assign to it it's proper stats and location
-     *       somewhere outside of the player's view.
+     *       enemy's init() function to assign to it it's proper stats and a random
+     *       location somewhere outside of the player's view.
      *
      *       In the future I may add an algorithm to add multiple enemies during a single
      *       frame, but not sure how to go about this yet */
     public void addNewEnemies() {
+        // get a "new" enemy from the pool
+        Enemy newEnemy = enemyPool.obtain();
 
+        // Initialize the enemy's values:
+        Character.CharacterTypeName newType = theWaveList.takeEnemy();
+        int curWave = theWaveList.getCurWave();
+        float newX = playerCharacter.getX();
+        float newY = playerCharacter.getY();
+        float deltaX = rand.nextFloat(enemySpawnSize * windowWidth) + windowWidth / 2;
+        float deltaY = rand.nextFloat(enemySpawnSize * windowHeight) + windowHeight / 2;
+
+        if (rand.nextInt() == 0)
+            // newX = (playerX) - (random value to the left of camera)
+            newX -= deltaX;
+        else
+            // newX = (playerX) + (random value to the right of camera)
+            newX += deltaX;
+
+        if (rand.nextInt() == 0)
+            // newY = (playerY) + (random value below the camera)
+            newY -= deltaY;
+        else
+            // newY = (playerY) - (random value below the camera)
+            newY += deltaY;
+
+        // Initialize the new values, overwriting this enemy's previous values
+        newEnemy.init(newType, newX, newY, curWave, world, physicsShapeCache);
+
+        // Add the new enemy to activeEnemies[]
+        activeEnemies.add(newEnemy);
     }
 
     // Nick: tells if a given character (C) is out-of-view of the camera, relative to player (P)

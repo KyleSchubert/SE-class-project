@@ -14,6 +14,7 @@ import com.badlogic.gdx.utils.ObjectMap;
 public class Wave {
 
 
+    // The in-game time at which this wave should start
     private float timeToStart;
     // List of enemy types for this wave
     private Array<Character.CharacterTypeName> EnemyTypes;
@@ -62,6 +63,12 @@ public class Wave {
             }
         }
     }
+
+
+    public float getTimeToStart() {
+        return timeToStart;
+    }
+
 
     // returns if every enemy type from this wave has been exhausted
     public boolean isEmpty() {
