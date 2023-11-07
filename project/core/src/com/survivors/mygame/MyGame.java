@@ -17,15 +17,15 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.codeandweb.physicseditor.PhysicsShapeCache;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pool;
+
+import java.util.ArrayList;
 import java.util.Random;
 
-import static com.survivors.mygame.Character.CharacterState.DYING; // Might not need this later if implementation changes
-import java.util.ArrayList;
+import static com.survivors.mygame.Character.CharacterState.DYING;
 
 
 public class MyGame extends ApplicationAdapter {
@@ -64,7 +64,7 @@ public class MyGame extends ApplicationAdapter {
      */
     private final float enemySpawnSize = 0.5f;
     /* Nick: this should keep track of how much time has passed in the player's current
-     *       playthrough of a level (aka total time - menu time - pause time), for the
+     *       play-through of a level (aka total time - menu time - pause time), for the
      *       purpose of initiating waves at the proper point of the level
      */
     public float timeElapsedInGame = 0.0f;
@@ -74,14 +74,14 @@ public class MyGame extends ApplicationAdapter {
     Enemy testEnemy4; // ALWAYS DECLARE HERE
     Enemy testEnemy5; // ALWAYS DECLARE HERE
     Enemy testEnemy6; // ALWAYS DECLARE HERE
-    private Array<Enemy> activeEnemies = new Array<>();
+    private final Array<Enemy> activeEnemies = new Array<>();
     /* Nick: GDX's Pool class for reusing class instances instead of
      *       constantly destroying and recreating them
      */
     private final Pool<Enemy> enemyPool = new Pool<Enemy>() {
         @Override
         protected Enemy newObject() {
-            return new Enemy(0.0f, 0.0f, world, physicsShapeCache);
+            return new Enemy();
         }
     };
     // Nick: Wave data can probably be gotten from a file to pass to WaveList constructor
@@ -101,7 +101,7 @@ public class MyGame extends ApplicationAdapter {
         for (Character.CharacterTypeName name : Character.CharacterTypeName.values()) {
             ALL_CHARACTER_DATA.add(new CharacterData(name));
         }
-      
+
         camera = new OrthographicCamera(viewWidth, viewHeight);
 
         viewport = new ScreenViewport(camera);
@@ -213,26 +213,34 @@ public class MyGame extends ApplicationAdapter {
         });
         stage.addActor(exitButton);
 
-        // NOTE: IN LIBGDX, POINT (0, 0) IS LOCATED AT THE BOTTOM LEFT, FOR THE DEFAULT CAMERA POSITION
-        testEnemy = new Enemy(Character.CharacterTypeName.BIRD, 3.2f, 4.2f, world, physicsShapeCache); // THEN INITIALIZE HERE
+        // WAVES
+        Array<Wave> temporaryArrayOfWavesBeforeWeMakeAWavelistFile = new Array<>();
+        theWaveList = new WaveList(temporaryArrayOfWavesBeforeWeMakeAWavelistFile);
 
-        testEnemy2 = new Enemy(Character.CharacterTypeName.ORANGE_MUSHROOM, 6, 7, world, physicsShapeCache); // THEN INITIALIZE HERE
-        // Default state is   Enemy.EnemyState.STANDING
+        testEnemy = new Enemy();
+        testEnemy.init(Character.CharacterTypeName.BIRD, 3.2f, 4.2f, 0, world, physicsShapeCache);
 
-        testEnemy3 = new Enemy(Character.CharacterTypeName.ORANGE_MUSHROOM, 11, 7, world, physicsShapeCache); // THEN INITIALIZE HERE
-        testEnemy3.setState(Character.CharacterState.MOVING); // SET STATES LIKE THIS
+        testEnemy2 = new Enemy();
+        testEnemy2.init(Character.CharacterTypeName.ORANGE_MUSHROOM, 6, 7, 0, world, physicsShapeCache);
+
+        testEnemy3 = new Enemy();
+        testEnemy3.init(Character.CharacterTypeName.ORANGE_MUSHROOM, 11, 7, 0, world, physicsShapeCache);
+        testEnemy3.setState(Character.CharacterState.MOVING);
         testEnemy3.move(1, 0, 90);
 
-        testEnemy4 = new Enemy(Character.CharacterTypeName.ORANGE_MUSHROOM, 16, 7, world, physicsShapeCache); // THEN INITIALIZE HERE
-        testEnemy4.setState(Character.CharacterState.MOVING); // SET STATES LIKE THIS
+        testEnemy4 = new Enemy();
+        testEnemy4.init(Character.CharacterTypeName.ORANGE_MUSHROOM, 16, 7, 0, world, physicsShapeCache);
+        testEnemy4.setState(Character.CharacterState.MOVING);
         testEnemy4.faceRight();
 
-        testEnemy5 = new Enemy(Character.CharacterTypeName.BIRD, 3, 9, world, physicsShapeCache); // THEN INITIALIZE HERE
-        testEnemy5.setState(Character.CharacterState.MOVING); // SET STATES LIKE THIS
+        testEnemy5 = new Enemy();
+        testEnemy5.init(Character.CharacterTypeName.BIRD, 3, 9, 0, world, physicsShapeCache);
+        testEnemy5.setState(Character.CharacterState.MOVING);
         testEnemy5.faceRight();
 
-        testEnemy6 = new Enemy(Character.CharacterTypeName.BIRD, 3, 14, world, physicsShapeCache); // THEN INITIALIZE HERE
-        testEnemy6.setState(Character.CharacterState.MOVING); // SET STATES LIKE THIS
+        testEnemy6 = new Enemy();
+        testEnemy6.init(Character.CharacterTypeName.BIRD, 3, 14, 0, world, physicsShapeCache);
+        testEnemy6.setState(Character.CharacterState.MOVING);
         testEnemy6.faceRight();
         testEnemy6.move(3, 1, 6); // Movement as a vector. It gets normalized and then scaled
 
@@ -244,7 +252,9 @@ public class MyGame extends ApplicationAdapter {
         int y = -10;
         for (Character.CharacterTypeName name : Character.CharacterTypeName.values()) {
             for (int i = 0; i < 6; i++) {
-                enemies.add(new Enemy(name, x, y, world, physicsShapeCache));
+                Enemy enemyGridEnemy = new Enemy();
+                enemyGridEnemy.init(name, x, y, 0, world, physicsShapeCache);
+                enemies.add(enemyGridEnemy);
                 if (i == 1) {
                     enemies.get(enemies.size() - 1).setState(Character.CharacterState.MOVING);
                 } else if (i == 2) {
@@ -266,16 +276,6 @@ public class MyGame extends ApplicationAdapter {
                 }
             }
         }
-
-
-        /*
-        The enemy images are set up in such a way that the origin of each monster will always
-            be on the bottom and middle of the actual enemy drawing part of each sprite
-        ESSENTIALLY, the origin is the center of the bottom of the "feet" of each enemy, even if it doesn't have feet.
-        For example, the orange mushroom is animated to jump a bit when it moves.
-            Its origin will be in the bottom middle, so for its jumping frame it
-            will be slightly below and actually detached from its body by appearance.
-         */
     }
 
 
@@ -388,13 +388,12 @@ public class MyGame extends ApplicationAdapter {
             // SHOULD only increment when player is in a level and unpaused
             timeElapsedInGame += delta;
 
-            /* Nick: commented out this test enemy code
             if (testEnemy3.getX() >= 30) {
                 testEnemy3.move(-2, 1, 90);
             } else if (testEnemy3.getX() <= 10) {
                 testEnemy3.move(2, -1, 90);
             }
-            */
+
             // Do keyChecks here
             playerCharacter.keyCheck();
             //
@@ -421,7 +420,7 @@ public class MyGame extends ApplicationAdapter {
 
         int curIndex = 0;
         for (Enemy E : activeEnemies) {
-            if (E.getState() == DYING || isOutofCamera(E, playerCharacter) && E.fromOldWave()) {
+            if (E.getState() == DYING || isOutOfCamera(E, playerCharacter) && E.fromOldWave()) {
                 indicesToRemove.add(curIndex);
             }
             curIndex++;
@@ -437,8 +436,8 @@ public class MyGame extends ApplicationAdapter {
     /* Nick: this method attempts to add a new enemy to the game from the current wave.
      *       It communicates with a WaveList instance to get the ID of the next enemy
      *       to be added to the game, takes an enemy from the pool, and uses this
-     *       enemy's init() function to assign to it it's proper stats and a random
-     *       location somewhere outside of the player's view.
+     *       enemy's init() function to assign to it its proper stats and a random
+     *       location somewhere outside the player's view.
      *
      *       In the future I may add an algorithm to add multiple enemies during a single
      *       frame, but not sure how to go about this yet */
@@ -476,7 +475,7 @@ public class MyGame extends ApplicationAdapter {
     }
 
     // Nick: tells if a given character (C) is out-of-view of the camera, relative to player (P)
-    public static boolean isOutofCamera(Character C, Character P) {
+    public static boolean isOutOfCamera(Character C, Character P) {
         return (Math.abs(C.getX() - P.getX()) > viewWidth / 2) || (Math.abs(C.getY() - P.getY()) > viewHeight / 2);
     }
 }

@@ -6,7 +6,6 @@ import com.codeandweb.physicseditor.PhysicsShapeCache;
 
 import static com.survivors.mygame.MyGame.ALL_CHARACTER_DATA;
 import static com.survivors.mygame.MyGame.SCALE_FACTOR;
-import static com.survivors.mygame.MyGame.ALL_CHARACTER_DATA;
 
 
 public class Character extends Mobile {
@@ -19,8 +18,7 @@ public class Character extends Mobile {
         BIRD, PLANT, STUMP, PIG, ORANGE_MUSHROOM, BLUE_MUSHROOM, ZOMBIE_MUSHROOM, HELMET_PENGUIN, SPEAR_PENGUIN, SMALL_PENGUIN, VOID
     }
 
-
-    /* Nick: I made characterData public and changable, as pool objects will
+    /* Nick: I made characterData public and changeable, as pool objects will
      *       have their attributes changed upon being used, instead of having
      *       a new constructor called each time
      */
@@ -44,7 +42,14 @@ public class Character extends Mobile {
      */
     public Character(CharacterTypeName characterTypeName, float x, float y, World world, PhysicsShapeCache physicsShapeCache) {
         this.dataIndex = characterTypeName.ordinal();
-        this.makeBody(ALL_CHARACTER_DATA.get(dataIndex).getInternalName(), x, y, 0, world, physicsShapeCache);
+        if (!ALL_CHARACTER_DATA.get(dataIndex).getInternalName().equals("void")) {
+            this.makeBody(ALL_CHARACTER_DATA.get(dataIndex).getInternalName(), x, y, 0, world, physicsShapeCache);
+        }
+        this.setState(CharacterState.STANDING);
+    }
+
+    public Character() {
+        this.dataIndex = CharacterTypeName.VOID.ordinal();
         this.setState(CharacterState.STANDING);
     }
 
@@ -96,6 +101,9 @@ public class Character extends Mobile {
      * @param elapsedTime Always input the one Float called "elapsedTime" in the MyGame.java file's render() section.
      */
     public void animate(SpriteBatch batch, float elapsedTime) {
+        if (ALL_CHARACTER_DATA.get(dataIndex).getInternalName().equals("void")) {
+            return;
+        }
         this.frameTime += elapsedTime;
         if (this.frame == this.stateFrameEndIndex) {
             if (this.frameTime > ALL_CHARACTER_DATA.get(dataIndex).getAllAnimationFrameDelays().get(this.stateFrameStartIndex)) {
@@ -122,5 +130,13 @@ public class Character extends Mobile {
 
     public void faceLeft() {
         this.isFacingLeft = 1;
+    }
+
+    public int getDataIndex() {
+        return dataIndex;
+    }
+
+    public void setDataIndex(int dataIndex) {
+        this.dataIndex = dataIndex;
     }
 }

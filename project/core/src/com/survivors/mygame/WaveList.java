@@ -27,10 +27,11 @@ public class WaveList {
        this function only returns the VOID character type, as we then wait for time
        to pass for the next wave to start. */
     public Character.CharacterTypeName takeEnemy() {
-        // if current wave is not empty:
-        if (!waveList.items[curWave].isEmpty())
-            // take from current wave
-            return waveList.items[curWave].takeEnemy();
+        if (this.curWave < waveList.size)
+            // if current wave is not empty:
+            if (!waveList.get(this.curWave).isEmpty())
+                // take from current wave
+                return waveList.items[curWave].takeEnemy();
 
         return Character.CharacterTypeName.VOID;
     }
