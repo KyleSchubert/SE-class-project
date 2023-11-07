@@ -150,6 +150,9 @@ public class CharacterData {
                 this.dimensionX = 94;
                 this.dimensionY = 62;
                 break;
+            // Nick: placeholder internal name for a void enemy
+            case VOID:
+                this.internalName = "void";
             default:
                 System.out.println("Why was a character almost generated with no matching type name? characterTypeName:  " + characterTypeName);
                 return;
@@ -289,7 +292,6 @@ public class CharacterData {
     public int getOriginY() {
         return originY;
     }
-
     public String getInternalName() {
         return internalName;
     }

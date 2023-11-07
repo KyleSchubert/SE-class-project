@@ -6,6 +6,8 @@ import com.codeandweb.physicseditor.PhysicsShapeCache;
 
 import static com.survivors.mygame.MyGame.ALL_CHARACTER_DATA;
 import static com.survivors.mygame.MyGame.SCALE_FACTOR;
+import static com.survivors.mygame.MyGame.ALL_CHARACTER_DATA;
+
 
 public class Character extends Mobile {
     public enum CharacterState {
@@ -13,9 +15,15 @@ public class Character extends Mobile {
     }
 
     public enum CharacterTypeName {
-        BIRD, PLANT, STUMP, PIG, ORANGE_MUSHROOM, BLUE_MUSHROOM, ZOMBIE_MUSHROOM, HELMET_PENGUIN, SPEAR_PENGUIN, SMALL_PENGUIN
+        // Nick: Added the VOID typename to denote a newly created enemy in a pool before use
+        BIRD, PLANT, STUMP, PIG, ORANGE_MUSHROOM, BLUE_MUSHROOM, ZOMBIE_MUSHROOM, HELMET_PENGUIN, SPEAR_PENGUIN, SMALL_PENGUIN, VOID
     }
 
+
+    /* Nick: I made characterData public and changable, as pool objects will
+     *       have their attributes changed upon being used, instead of having
+     *       a new constructor called each time
+     */
     private int dataIndex;
     private CharacterState state;
     private float frameTime = 0;
@@ -38,6 +46,10 @@ public class Character extends Mobile {
         this.dataIndex = characterTypeName.ordinal();
         this.makeBody(ALL_CHARACTER_DATA.get(dataIndex).getInternalName(), x, y, 0, world, physicsShapeCache);
         this.setState(CharacterState.STANDING);
+    }
+
+    public CharacterState getState() {
+        return state;
     }
 
     /**
