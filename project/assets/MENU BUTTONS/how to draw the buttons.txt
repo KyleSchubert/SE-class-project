@@ -1,0 +1,21 @@
+Remove the picture of the skill book from the button on the bottom of the screen on my browser game and take screenshots of that button with different text and these settings:
+Then also turn off the background on the page (on <body>)
+And move the button down so that it is in the white area of the screen (may have to shrink the game area or use a vertical monitor to avoid needing to zoom out)
+After go in paint.net and use the magic wand to remove the white background
+
+untoggle   width: 200px;   from   #skillMenuButton   and   #bottomScreenArea
+
+on #skillMenuButton:
+for hover:   linear-gradient(#00b8cb, #00273b)
+for default:   linear-gradient(#969696, #2b2b2b)
+
+padding-left: 45px;
+padding-right: 45px;
+padding-top: 5px;
+padding-bottom: 5px;
+
+font stuff:
+	color: white;
+	font-size: xx-large;
+	z-index: anything above 0
+	font-weight: bold;

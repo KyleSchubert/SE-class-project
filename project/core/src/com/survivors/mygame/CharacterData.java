@@ -292,4 +292,7 @@ public class CharacterData {
     public int getOriginY() {
         return originY;
     }
+    public String getInternalName() {
+        return internalName;
+    }
 }

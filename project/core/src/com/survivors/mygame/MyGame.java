@@ -4,20 +4,29 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.codeandweb.physicseditor.PhysicsShapeCache;
-
-// Nick's imports
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-
 import java.util.Random;
 
-import static com.survivors.mygame.Character.CharacterState.DYING;
+import static com.survivors.mygame.Character.CharacterState.DYING; // Might not need this later if implementation changes
+import java.util.ArrayList;
+
 
 public class MyGame extends ApplicationAdapter {
     /**
@@ -27,43 +36,45 @@ public class MyGame extends ApplicationAdapter {
      * There is no other way to increase the speed limit without breaking anything.
      */
     public static final float SCALE_FACTOR = 0.05f;
-    ExtendViewport viewport;
+    ScreenViewport viewport;
     World world;
     SpriteBatch batch;
     PhysicsShapeCache physicsShapeCache;
     OrthographicCamera camera;
+    ScreenViewport viewportForStage;
+    Stage stage;
+    public int amountOfCurrency;
+    BitmapFont font;
+    Image currencyCounterImage;
+    ImageButton playButton;
+    ImageButton upgradesButton;
+    ImageButton settingsButton;
+    ImageButton exitButton;
     Texture theFloor;
     public static final Array<CharacterData> ALL_CHARACTER_DATA = new Array<>();
-
+    Box2DDebugRenderer debugRenderer;
     // Nick: moved these to global range to be used efficiently in isOutOfCamera()
     private static final float windowWidth = 1440;
     private static final float windowHeight = 920;
     private static final float viewWidth = windowWidth * SCALE_FACTOR;
     private static final float viewHeight = windowHeight * SCALE_FACTOR;
-
     /* Nick: Represents the size of the area outside the camera at which enemies
      *       can spawn; 0.5 means the area's width and height extends out from the
      *       camera edges by 0.5 * the camera width and height, respectively
      */
     private final float enemySpawnSize = 0.5f;
-
     /* Nick: this should keep track of how much time has passed in the player's current
      *       playthrough of a level (aka total time - menu time - pause time), for the
      *       purpose of initiating waves at the proper point of the level
      */
     public float timeElapsedInGame = 0.0f;
-
-    /* Nick: Kyle's test enemies
-    Enemy testEnemy;  // ALWAYS DECLARE HERE
+    Enemy testEnemy; // ALWAYS DECLARE HERE
     Enemy testEnemy2; // ALWAYS DECLARE HERE
     Enemy testEnemy3; // ALWAYS DECLARE HERE
     Enemy testEnemy4; // ALWAYS DECLARE HERE
     Enemy testEnemy5; // ALWAYS DECLARE HERE
     Enemy testEnemy6; // ALWAYS DECLARE HERE
-    */
-
     private Array<Enemy> activeEnemies = new Array<>();
-
     /* Nick: GDX's Pool class for reusing class instances instead of
      *       constantly destroying and recreating them
      */
@@ -73,14 +84,12 @@ public class MyGame extends ApplicationAdapter {
             return new Enemy(0.0f, 0.0f, world, physicsShapeCache);
         }
     };
-
     // Nick: Wave data can probably be gotten from a file to pass to WaveList constructor
     private WaveList theWaveList;
-
     // Currently used to spawn enemies in a random location just outside of player's view
     Random rand = new Random();
-
     PlayerCharacter playerCharacter;
+    ArrayList<Enemy> enemies; // For the grid of each enemy. For testing
 
     @Override
     public void create() {
@@ -92,20 +101,173 @@ public class MyGame extends ApplicationAdapter {
         for (Character.CharacterTypeName name : Character.CharacterTypeName.values()) {
             ALL_CHARACTER_DATA.add(new CharacterData(name));
         }
-
-        /* Nick: moved these declarations to global range within MyGame (see above)
-         * float windowWidth  = Gdx.graphics.getWidth();
-         * float windowHeight = Gdx.graphics.getHeight();
-         */
-
+      
         camera = new OrthographicCamera(viewWidth, viewHeight);
 
-        viewport = new ExtendViewport(viewWidth, viewHeight, camera);
+        viewport = new ScreenViewport(camera);
+        viewport.setUnitsPerPixel(SCALE_FACTOR);
+
         theFloor = new Texture("testFloor1.png");
 
         theFloor.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
 
+        debugRenderer = new Box2DDebugRenderer();
+
+        // For the UI and menus
+        viewportForStage = new ScreenViewport(camera);
+        viewportForStage.setUnitsPerPixel(SCALE_FACTOR);
+        stage = new Stage(viewportForStage);
+
+        Gdx.input.setInputProcessor(stage);
+
+        // Load the in-game currency counter
+        amountOfCurrency = 0;
+        currencyCounterImage = new Image(new Texture(Gdx.files.internal("ITEMS/doubloon.png")));
+        currencyCounterImage.setSize(29 * SCALE_FACTOR, 30 * SCALE_FACTOR);
+        stage.addActor(currencyCounterImage);
+        font = new BitmapFont(Gdx.files.internal("font.fnt"), false);
+        font.setUseIntegerPositions(false);
+        font.getData().setScale(SCALE_FACTOR, SCALE_FACTOR);
+
+        // Menu buttons below
+        // PLAY button
+        playButton = new ImageButton(
+                new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("MENU BUTTONS/play/default.png")))),
+                new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("MENU BUTTONS/play/hover.png"))))
+        );
+        playButton.setSize(362 * SCALE_FACTOR, 122 * SCALE_FACTOR);
+        playButton.addListener(new InputListener() {
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                System.out.println("CLICKED UP");
+                amountOfCurrency++;
+            }
+
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                System.out.println("CLICKED DOWN");
+                return true;
+            }
+        });
+        stage.addActor(playButton);
+
+        // UPGRADES button
+        upgradesButton = new ImageButton(
+                new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("MENU BUTTONS/upgrades/default.png")))),
+                new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("MENU BUTTONS/upgrades/hover.png"))))
+        );
+        upgradesButton.setSize(248 * SCALE_FACTOR, 72 * SCALE_FACTOR);
+        upgradesButton.addListener(new InputListener() {
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                System.out.println("CLICKED UP");
+                amountOfCurrency += 10;
+            }
+
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                System.out.println("CLICKED DOWN");
+                return true;
+            }
+        });
+        stage.addActor(upgradesButton);
+
+        // SETTINGS button
+        settingsButton = new ImageButton(
+                new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("MENU BUTTONS/settings/default.png")))),
+                new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("MENU BUTTONS/settings/hover.png"))))
+        );
+        settingsButton.setSize(224 * SCALE_FACTOR, 72 * SCALE_FACTOR);
+        settingsButton.addListener(new InputListener() {
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                System.out.println("CLICKED UP");
+                amountOfCurrency += 100;
+            }
+
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                System.out.println("CLICKED DOWN");
+                return true;
+            }
+        });
+        stage.addActor(settingsButton);
+
+        // EXIT button
+        exitButton = new ImageButton(
+                new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("MENU BUTTONS/exit/default.png")))),
+                new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("MENU BUTTONS/exit/hover.png"))))
+        );
+        exitButton.setSize(152 * SCALE_FACTOR, 72 * SCALE_FACTOR);
+        exitButton.addListener(new InputListener() {
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                Gdx.app.exit();
+                System.exit(-1);
+            }
+
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                return true;
+            }
+        });
+        stage.addActor(exitButton);
+
+        // NOTE: IN LIBGDX, POINT (0, 0) IS LOCATED AT THE BOTTOM LEFT, FOR THE DEFAULT CAMERA POSITION
+        testEnemy = new Enemy(Character.CharacterTypeName.BIRD, 3.2f, 4.2f, world, physicsShapeCache); // THEN INITIALIZE HERE
+
+        testEnemy2 = new Enemy(Character.CharacterTypeName.ORANGE_MUSHROOM, 6, 7, world, physicsShapeCache); // THEN INITIALIZE HERE
+        // Default state is   Enemy.EnemyState.STANDING
+
+        testEnemy3 = new Enemy(Character.CharacterTypeName.ORANGE_MUSHROOM, 11, 7, world, physicsShapeCache); // THEN INITIALIZE HERE
+        testEnemy3.setState(Character.CharacterState.MOVING); // SET STATES LIKE THIS
+        testEnemy3.move(1, 0, 90);
+
+        testEnemy4 = new Enemy(Character.CharacterTypeName.ORANGE_MUSHROOM, 16, 7, world, physicsShapeCache); // THEN INITIALIZE HERE
+        testEnemy4.setState(Character.CharacterState.MOVING); // SET STATES LIKE THIS
+        testEnemy4.faceRight();
+
+        testEnemy5 = new Enemy(Character.CharacterTypeName.BIRD, 3, 9, world, physicsShapeCache); // THEN INITIALIZE HERE
+        testEnemy5.setState(Character.CharacterState.MOVING); // SET STATES LIKE THIS
+        testEnemy5.faceRight();
+
+        testEnemy6 = new Enemy(Character.CharacterTypeName.BIRD, 3, 14, world, physicsShapeCache); // THEN INITIALIZE HERE
+        testEnemy6.setState(Character.CharacterState.MOVING); // SET STATES LIKE THIS
+        testEnemy6.faceRight();
+        testEnemy6.move(3, 1, 6); // Movement as a vector. It gets normalized and then scaled
+
         playerCharacter = new PlayerCharacter(36, 23, world, physicsShapeCache);
+
+
+        enemies = new ArrayList<>();
+        int x = 40;
+        int y = -10;
+        for (Character.CharacterTypeName name : Character.CharacterTypeName.values()) {
+            for (int i = 0; i < 6; i++) {
+                enemies.add(new Enemy(name, x, y, world, physicsShapeCache));
+                if (i == 1) {
+                    enemies.get(enemies.size() - 1).setState(Character.CharacterState.MOVING);
+                } else if (i == 2) {
+                    enemies.get(enemies.size() - 1).setState(Character.CharacterState.DYING);
+                } else if (i == 3) {
+                    enemies.get(enemies.size() - 1).faceRight();
+                } else if (i == 4) {
+                    enemies.get(enemies.size() - 1).setState(Character.CharacterState.MOVING);
+                    enemies.get(enemies.size() - 1).faceRight();
+                } else if (i == 5) {
+                    enemies.get(enemies.size() - 1).setState(Character.CharacterState.DYING);
+                    enemies.get(enemies.size() - 1).faceRight();
+                }
+                if (x < 80) {
+                    x += 8;
+                } else {
+                    y += 6;
+                    x = 40;
+                }
+            }
+        }
+
+
         /*
         The enemy images are set up in such a way that the origin of each monster will always
             be on the bottom and middle of the actual enemy drawing part of each sprite
@@ -124,6 +286,7 @@ public class MyGame extends ApplicationAdapter {
         camera.position.set(playerCharacter.getX(), playerCharacter.getY(), 0);
         camera.update();
         batch.setProjectionMatrix(camera.combined);
+        viewport.apply();
         batch.begin();
         batch.draw(theFloor,
                 playerCharacter.getX() - 2160 * SCALE_FACTOR, playerCharacter.getY() - 1350 * SCALE_FACTOR,
@@ -135,19 +298,42 @@ public class MyGame extends ApplicationAdapter {
                 4320, 2700,
                 false, false
         );
-
         // Nick: animate each enemy in current list pulled from the pool
         for (Enemy E : activeEnemies) {
             E.animate(batch, elapsedTime);
         }
 
+        testEnemy.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
+        testEnemy2.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
+        testEnemy3.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
+        testEnemy4.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
+        testEnemy5.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
+        testEnemy6.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
+        for (Enemy enemy : enemies) {
+            enemy.animate(batch, elapsedTime);
+        }
         playerCharacter.animate(batch, elapsedTime);
+        font.draw(batch, "x " + amountOfCurrency, playerCharacter.getX() - 19.2f, playerCharacter.getY() - 9.7f); // text for currency counter
         batch.end();
+
+        // MOVE THE MENU BUTTONS, or we could prevent the player from being moved
+        stage.getActors().get(0).setPosition(playerCharacter.getX() - 21, playerCharacter.getY() - 11); // currencyCounterImage
+        stage.getActors().get(1).setPosition(playerCharacter.getX() - 35, playerCharacter.getY() - 7); // playButton
+        stage.getActors().get(2).setPosition(playerCharacter.getX() - 35, playerCharacter.getY() - 12); // upgradesButton
+        stage.getActors().get(3).setPosition(playerCharacter.getX() - 35, playerCharacter.getY() - 17); // settingsButton
+        stage.getActors().get(4).setPosition(playerCharacter.getX() - 35, playerCharacter.getY() - 22); // exitButton
+
+        stage.getViewport().apply();
+        stage.act(elapsedTime);
+        stage.draw();
+        // DEBUG WIREFRAME:
+        debugRenderer.render(world, camera.combined);
     }
 
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height, true);
+        stage.getViewport().update(width, height, true);
         batch.setProjectionMatrix(camera.combined);
     }
 
@@ -158,6 +344,8 @@ public class MyGame extends ApplicationAdapter {
         world.dispose();
         theFloor.dispose();
         physicsShapeCache.dispose();
+        stage.dispose();
+        font.dispose();
     }
 
     // START SUGGESTED CODE FROM -> https://www.codeandweb.com/physicseditor/tutorials/libgdx-physics

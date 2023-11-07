@@ -1,15 +1,10 @@
 package com.survivors.mygame;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.World;
 import com.codeandweb.physicseditor.PhysicsShapeCache;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-
+import static com.survivors.mygame.MyGame.ALL_CHARACTER_DATA;
 import static com.survivors.mygame.MyGame.SCALE_FACTOR;
 import static com.survivors.mygame.MyGame.ALL_CHARACTER_DATA;
 
@@ -24,11 +19,12 @@ public class Character extends Mobile {
         BIRD, PLANT, STUMP, PIG, ORANGE_MUSHROOM, BLUE_MUSHROOM, ZOMBIE_MUSHROOM, HELMET_PENGUIN, SPEAR_PENGUIN, SMALL_PENGUIN, VOID
     }
 
+
     /* Nick: I made characterData public and changable, as pool objects will
      *       have their attributes changed upon being used, instead of having
      *       a new constructor called each time
      */
-    int dataIndex;
+    private int dataIndex;
     private CharacterState state;
     private float frameTime = 0;
     private int frame = 0;
@@ -48,7 +44,7 @@ public class Character extends Mobile {
      */
     public Character(CharacterTypeName characterTypeName, float x, float y, World world, PhysicsShapeCache physicsShapeCache) {
         this.dataIndex = characterTypeName.ordinal();
-        this.makeBody(x, y, 0, world, physicsShapeCache);
+        this.makeBody(ALL_CHARACTER_DATA.get(dataIndex).getInternalName(), x, y, 0, world, physicsShapeCache);
         this.setState(CharacterState.STANDING);
     }
 
