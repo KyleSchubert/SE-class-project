@@ -1,7 +1,6 @@
 package com.survivors.mygame;
 
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.ObjectMap;
 
 
 /* A wave represents a set of enemy types and the number of enemies
