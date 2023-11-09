@@ -100,7 +100,7 @@ public class WaveList {
             // if current wave is not empty:
             if (!waveList.get(this.curWave).isEmpty()) {
                 // take from current wave
-                return waveList.items[curWave].takeEnemy();
+                return waveList.get(this.curWave).takeEnemy();
             }
         }
 
@@ -114,7 +114,7 @@ public class WaveList {
         // if current wave is not the last wave:
         if (curWave < waveList.size - 1) {
             // If it is time for the next wave to start:
-            if (curTime >= waveList.items[curWave].getTimeToStart()) {
+            if (curTime >= waveList.get(curWave).getTimeToStart()) {
                 // advance to the next wave
                 curWave++;
                 return true;

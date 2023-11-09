@@ -434,8 +434,8 @@ public class MyGame extends ApplicationAdapter {
 
         // removing from right-to-left so indices stay intact
         for (int i = indicesToRemove.size - 1; i >= 0; i--) {
-            enemyPool.free(activeEnemies.items[indicesToRemove.items[i]]);
-            activeEnemies.removeIndex(indicesToRemove.items[i]);
+            enemyPool.free(activeEnemies.get(indicesToRemove.get(i)));
+            activeEnemies.removeIndex(indicesToRemove.get(i));
         }
     }
 

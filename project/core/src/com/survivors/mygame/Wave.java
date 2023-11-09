@@ -43,18 +43,18 @@ public class Wave {
      */
     public Character.CharacterTypeName takeEnemy() {
         // if current index still has enemies left:
-        if (EnemyNums.items[curIndex] > 0) {
+        if (EnemyNums.get(curIndex) > 0) {
             // take an enemy
-            EnemyNums.items[curIndex]--;
-            return EnemyTypes.items[curIndex];
+            EnemyNums.set(curIndex, EnemyNums.get(curIndex) - 1);
+            return EnemyTypes.get(curIndex);
         } else {
             // increment index
             curIndex++;
             // if new index is valid:
             if (curIndex < EnemyNums.size) {
                 // take an enemy
-                EnemyNums.items[curIndex]--;
-                return EnemyTypes.items[curIndex];
+                EnemyNums.set(curIndex, EnemyNums.get(curIndex) - 1);
+                return EnemyTypes.get(curIndex);
             } else {
                 // this wave is now exhausted
                 isEmpty = true;
