@@ -42,7 +42,7 @@ public class MyGame extends ApplicationAdapter {
     PhysicsShapeCache physicsShapeCache;
     OrthographicCamera camera;
     ScreenViewport viewportForStage;
-    Stage stage;
+    Stage mainMenuStage;
     public int amountOfCurrency;
     BitmapFont font;
     Image currencyCounterImage;
@@ -68,6 +68,7 @@ public class MyGame extends ApplicationAdapter {
      *       purpose of initiating waves at the proper point of the level
      */
     public float timeElapsedInGame = 0.0f;
+    private String timeText = "0:00";
     Enemy testEnemy; // ALWAYS DECLARE HERE
     Enemy testEnemy2; // ALWAYS DECLARE HERE
     Enemy testEnemy3; // ALWAYS DECLARE HERE
@@ -90,6 +91,22 @@ public class MyGame extends ApplicationAdapter {
     Random rand = new Random();
     PlayerCharacter playerCharacter;
     ArrayList<Enemy> enemies; // For the grid of each enemy. For testing
+
+    // Menu variables and stuff below:
+    public enum MenuState {
+        MAIN_MENU, PLAYING, PAUSED, RESULTS, LEVEL_UP, UPGRADES, SETTINGS
+    }
+
+    protected boolean isGameplayPaused; // [1] is the corresponding action in setMenuState()
+    private boolean isDrawGameplayObjects; // [3] is the corresponding action in setMenuState()
+    private boolean isDrawMainMenu; // [4] is the corresponding action in setMenuState()
+    private boolean isDrawDarkTransparentScreen; // [5] is the corresponding action in setMenuState()
+    private boolean isDrawPauseMenu; // [8] is the corresponding action in setMenuState()
+    private boolean isDrawResultsMenu; // [9] is the corresponding action in setMenuState()
+    private boolean isDrawLevelUpMenu; // [10] is the corresponding action in setMenuState()
+    private boolean isDrawUpgradesMenu; // [11] is the corresponding action in setMenuState()
+    private boolean isDrawSettingsMenu; // [12] is the corresponding action in setMenuState()
+    // End of menu variables and stuff
 
     @Override
     public void create() {
@@ -116,15 +133,15 @@ public class MyGame extends ApplicationAdapter {
         // For the UI and menus
         viewportForStage = new ScreenViewport(camera);
         viewportForStage.setUnitsPerPixel(SCALE_FACTOR);
-        stage = new Stage(viewportForStage);
+        mainMenuStage = new Stage(viewportForStage);
 
-        Gdx.input.setInputProcessor(stage);
+        Gdx.input.setInputProcessor(mainMenuStage);
 
         // Load the in-game currency counter
         amountOfCurrency = 0;
         currencyCounterImage = new Image(new Texture(Gdx.files.internal("ITEMS/doubloon.png")));
         currencyCounterImage.setSize(29 * SCALE_FACTOR, 30 * SCALE_FACTOR);
-        stage.addActor(currencyCounterImage);
+        mainMenuStage.addActor(currencyCounterImage);
         font = new BitmapFont(Gdx.files.internal("font.fnt"), false);
         font.setUseIntegerPositions(false);
         font.getData().setScale(SCALE_FACTOR, SCALE_FACTOR);
@@ -139,17 +156,15 @@ public class MyGame extends ApplicationAdapter {
         playButton.addListener(new InputListener() {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                System.out.println("CLICKED UP");
-                amountOfCurrency++;
+                setMenuState(MenuState.PLAYING);
             }
 
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                System.out.println("CLICKED DOWN");
                 return true;
             }
         });
-        stage.addActor(playButton);
+        mainMenuStage.addActor(playButton);
 
         // UPGRADES button
         upgradesButton = new ImageButton(
@@ -170,7 +185,7 @@ public class MyGame extends ApplicationAdapter {
                 return true;
             }
         });
-        stage.addActor(upgradesButton);
+        mainMenuStage.addActor(upgradesButton);
 
         // SETTINGS button
         settingsButton = new ImageButton(
@@ -191,7 +206,7 @@ public class MyGame extends ApplicationAdapter {
                 return true;
             }
         });
-        stage.addActor(settingsButton);
+        mainMenuStage.addActor(settingsButton);
 
         // EXIT button
         exitButton = new ImageButton(
@@ -211,7 +226,7 @@ public class MyGame extends ApplicationAdapter {
                 return true;
             }
         });
-        stage.addActor(exitButton);
+        mainMenuStage.addActor(exitButton);
 
         // WAVES
         Array<Wave> temporaryArrayOfWavesBeforeWeMakeAWavelistFile = new Array<>();
@@ -276,6 +291,8 @@ public class MyGame extends ApplicationAdapter {
                 }
             }
         }
+
+        setMenuState(MenuState.MAIN_MENU);
     }
 
 
@@ -287,45 +304,69 @@ public class MyGame extends ApplicationAdapter {
         camera.update();
         batch.setProjectionMatrix(camera.combined);
         viewport.apply();
-        batch.begin();
-        batch.draw(theFloor,
-                playerCharacter.getX() - 2160 * SCALE_FACTOR, playerCharacter.getY() - 1350 * SCALE_FACTOR,
-                0, 0,
-                4320, 2700,
-                SCALE_FACTOR, SCALE_FACTOR,
-                0,
-                (int) (playerCharacter.getX() * 1 / SCALE_FACTOR), -(int) (playerCharacter.getY() * 1 / SCALE_FACTOR),
-                4320, 2700,
-                false, false
-        );
-        // Nick: animate each enemy in current list pulled from the pool
-        for (Enemy E : activeEnemies) {
-            E.animate(batch, elapsedTime);
-        }
 
-        testEnemy.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
-        testEnemy2.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
-        testEnemy3.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
-        testEnemy4.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
-        testEnemy5.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
-        testEnemy6.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
-        for (Enemy enemy : enemies) {
-            enemy.animate(batch, elapsedTime);
+        batch.begin();
+        if (this.isDrawGameplayObjects) {
+            batch.draw(theFloor,
+                    playerCharacter.getX() - 2160 * SCALE_FACTOR, playerCharacter.getY() - 1350 * SCALE_FACTOR,
+                    0, 0,
+                    4320, 2700,
+                    SCALE_FACTOR, SCALE_FACTOR,
+                    0,
+                    (int) (playerCharacter.getX() * 1 / SCALE_FACTOR), -(int) (playerCharacter.getY() * 1 / SCALE_FACTOR),
+                    4320, 2700,
+                    false, false
+            );
+            // Nick: animate each enemy in current list pulled from the pool
+            for (Enemy E : activeEnemies) {
+                E.animate(batch, elapsedTime);
+            }
+
+            testEnemy.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
+            testEnemy2.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
+            testEnemy3.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
+            testEnemy4.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
+            testEnemy5.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
+            testEnemy6.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
+            for (Enemy enemy : enemies) {
+                enemy.animate(batch, elapsedTime);
+            }
+            playerCharacter.animate(batch, elapsedTime);
         }
-        playerCharacter.animate(batch, elapsedTime);
-        font.draw(batch, "x " + amountOfCurrency, playerCharacter.getX() - 19.2f, playerCharacter.getY() - 9.7f); // text for currency counter
+        if (this.isDrawMainMenu) {
+            font.draw(batch, "x " + amountOfCurrency, playerCharacter.getX() - 19.2f, playerCharacter.getY() - 9.7f); // text for currency counter
+        }
+        font.draw(batch, timeText, playerCharacter.getX() - 1.4f, playerCharacter.getY() + 22.6f); // text for time elapsed in game
         batch.end();
 
-        // MOVE THE MENU BUTTONS, or we could prevent the player from being moved
-        stage.getActors().get(0).setPosition(playerCharacter.getX() - 21, playerCharacter.getY() - 11); // currencyCounterImage
-        stage.getActors().get(1).setPosition(playerCharacter.getX() - 35, playerCharacter.getY() - 7); // playButton
-        stage.getActors().get(2).setPosition(playerCharacter.getX() - 35, playerCharacter.getY() - 12); // upgradesButton
-        stage.getActors().get(3).setPosition(playerCharacter.getX() - 35, playerCharacter.getY() - 17); // settingsButton
-        stage.getActors().get(4).setPosition(playerCharacter.getX() - 35, playerCharacter.getY() - 22); // exitButton
-
-        stage.getViewport().apply();
-        stage.act(elapsedTime);
-        stage.draw();
+        if (this.isDrawMainMenu) {
+            mainMenuStage.getActors().get(0).setPosition(playerCharacter.getX() - 21, playerCharacter.getY() - 11); // currencyCounterImage
+            mainMenuStage.getActors().get(1).setPosition(playerCharacter.getX() - 35, playerCharacter.getY() - 7); // playButton
+            mainMenuStage.getActors().get(2).setPosition(playerCharacter.getX() - 35, playerCharacter.getY() - 12); // upgradesButton
+            mainMenuStage.getActors().get(3).setPosition(playerCharacter.getX() - 35, playerCharacter.getY() - 17); // settingsButton
+            mainMenuStage.getActors().get(4).setPosition(playerCharacter.getX() - 35, playerCharacter.getY() - 22); // exitButton
+            mainMenuStage.getViewport().apply();
+            mainMenuStage.act(elapsedTime);
+            mainMenuStage.draw();
+        }
+        if (this.isDrawDarkTransparentScreen) {
+            // draw the dark transparent screen (that either prevents clicking other menu buttons or those other buttons should be temporarily disabled)
+        }
+        if (this.isDrawLevelUpMenu) {
+            // draw the level-up menu
+        }
+        if (this.isDrawPauseMenu) {
+            // draw the pause menu
+        }
+        if (this.isDrawResultsMenu) {
+            // draw the results menu
+        }
+        if (this.isDrawUpgradesMenu) {
+            // draw the upgrades menu
+        }
+        if (this.isDrawSettingsMenu) {
+            // draw the settings menu
+        }
         // DEBUG WIREFRAME:
         debugRenderer.render(world, camera.combined);
     }
@@ -333,7 +374,7 @@ public class MyGame extends ApplicationAdapter {
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height, true);
-        stage.getViewport().update(width, height, true);
+        mainMenuStage.getViewport().update(width, height, true);
         batch.setProjectionMatrix(camera.combined);
     }
 
@@ -344,7 +385,7 @@ public class MyGame extends ApplicationAdapter {
         world.dispose();
         theFloor.dispose();
         physicsShapeCache.dispose();
-        stage.dispose();
+        mainMenuStage.dispose();
         font.dispose();
     }
 
@@ -360,44 +401,51 @@ public class MyGame extends ApplicationAdapter {
         accumulator += Math.min(delta, 0.25f);
         if (accumulator >= STEP_TIME) {
             accumulator -= STEP_TIME;
+            if (!this.isGameplayPaused) {
+                /* Nick: each frame (if in a game and unpaused) we want to:
+                 *       1) check for enemies to remove and return to the pool,
+                 *       2) attempt to add new enemies to activeEnemies[] from the pool, using current wave as a guide,
+                 *       3) Check to see if the next wave is ready to begin
+                 *             a) if next wave is ready, mark all enemies that are from previous waves
+                 *       4) increment timeElapsedInGame if player is in a level and unpaused
+                 */
 
-            /* Nick: each frame (if in a game and unpaused) we want to:
-             *       1) check for enemies to remove and return to the pool,
-             *       2) attempt to add new enemies to activeEnemies[] from the pool, using current wave as a guide,
-             *       3) Check to see if the next wave is ready to begin
-             *             a) if next wave is ready, mark all enemies that are from previous waves
-             *       4) increment timeElapsedInGame if player is in a level and unpaused
-             */
-
-            // Part 1)
-            removeStaleEnemies();
-            // Part 2)
-            addNewEnemies();
-            // Part 3)
-            // if it is time to advance to the next wave:
-            if (theWaveList.advanceWave(timeElapsedInGame)) {
-                // mark all active enemies that are from old waves
-                int curWave = theWaveList.getCurWave();
-                for (Enemy E : activeEnemies) {
-                    if (E.getSpawnedWave() < curWave)
-                        E.markOldWave();
+                // Part 1)
+                removeStaleEnemies();
+                // Part 2)
+                addNewEnemies();
+                // Part 3)
+                // if it is time to advance to the next wave:
+                if (theWaveList.advanceWave(timeElapsedInGame)) {
+                    // mark all active enemies that are from old waves
+                    int curWave = theWaveList.getCurWave();
+                    for (Enemy E : activeEnemies) {
+                        if (E.getSpawnedWave() < curWave)
+                            E.markOldWave();
+                    }
                 }
+
+                // Part 4)
+                // SHOULD only increment when player is in a level and unpaused
+                timeElapsedInGame += delta;
+                int minutes = (int) timeElapsedInGame / 60;
+                int seconds = (int) timeElapsedInGame - minutes * 60;
+                if (seconds < 10) {
+                    timeText = minutes + ":0" + seconds;
+                } else {
+                    timeText = minutes + ":" + seconds;
+                }
+
+                if (testEnemy3.getX() >= 30) {
+                    testEnemy3.move(-2, 1, 90);
+                } else if (testEnemy3.getX() <= 10) {
+                    testEnemy3.move(2, -1, 90);
+                }
+
+                // Do keyChecks here
+                playerCharacter.keyCheck();
+                world.step(STEP_TIME, VELOCITY_ITERATIONS, POSITION_ITERATIONS);
             }
-
-            // Part 4)
-            // SHOULD only increment when player is in a level and unpaused
-            timeElapsedInGame += delta;
-
-            if (testEnemy3.getX() >= 30) {
-                testEnemy3.move(-2, 1, 90);
-            } else if (testEnemy3.getX() <= 10) {
-                testEnemy3.move(2, -1, 90);
-            }
-
-            // Do keyChecks here
-            playerCharacter.keyCheck();
-            //
-            world.step(STEP_TIME, VELOCITY_ITERATIONS, POSITION_ITERATIONS);
             return STEP_TIME;
         } else {
             return 0;
@@ -477,6 +525,113 @@ public class MyGame extends ApplicationAdapter {
     // Nick: tells if a given character (C) is out-of-view of the camera, relative to player (P)
     public static boolean isOutOfCamera(Character C, Character P) {
         return (Math.abs(C.getX() - P.getX()) > viewWidth / 2) || (Math.abs(C.getY() - P.getY()) > viewHeight / 2);
+    }
+
+    public void setMenuState(MenuState menuState) {
+        switch (menuState) {
+            case MAIN_MENU:
+                // GAME STARTS IN THIS STATE
+                // POTENTIAL PREVIOUS STATES: upgrades, settings, results
+                setGameplayPaused(true); // [1] disable movement and pause the timer
+                // [2] reset PlayerCharacter.
+                playerCharacter.setState(Character.CharacterState.STANDING);
+                playerCharacter.faceRight();
+                // more stuff, like resetting their stats and items
+                //
+                setDrawGameplayObjects(true); // [3] enable Character, floor, and skill drawing.
+                setDrawMainMenu(true); // [4] enable drawing main menu
+                setDrawDarkTransparentScreen(false); // [5] disable drawing the dark transparent screen that makes other menus more visible
+                this.timeElapsedInGame = 0f; // [6] reset timer
+                // [7] remove all enemies
+                activeEnemies.clear();
+                theWaveList.curWave = 0;
+                // unsure what else we'll need to do to reset the waves
+                //
+                setDrawPauseMenu(false); // Needed for initialization: [8] disable drawing the pause menu
+                setDrawResultsMenu(false); // [9] disable drawing the results menu
+                setDrawLevelUpMenu(false); // Needed for initialization: [10] disable drawing the level_up menu
+                setDrawUpgradesMenu(false); // [11] disable drawing the upgrades menu
+                setDrawSettingsMenu(false); // [12] disable drawing the settings menu
+                break;
+            case PLAYING:
+                // POTENTIAL PREVIOUS STATES: paused, main_menu, level_up
+                setGameplayPaused(false); // [1] enable movement and unpause the timer
+                setDrawGameplayObjects(true); // [3] enable Character, floor, and skill drawing.
+                setDrawMainMenu(false); // [4] disable drawing main menu
+                setDrawDarkTransparentScreen(false); // [5] disable drawing the dark transparent screen that makes other menus more visible
+                setDrawPauseMenu(false); // [8] disable drawing the pause menu
+                setDrawLevelUpMenu(false); // [10] disable drawing the level_up menu
+                break;
+            case PAUSED:
+                // POTENTIAL PREVIOUS STATES: playing, settings
+                setGameplayPaused(true); // [1] disable movement and pause the timer
+                setDrawGameplayObjects(false); // [3] disable Character, floor, and skill drawing.
+                setDrawDarkTransparentScreen(true); // [5] enable drawing the dark transparent screen that makes other menus more visible
+                setDrawPauseMenu(true); // [8] enable drawing the pause menu
+                setDrawSettingsMenu(false); // [12] disable drawing the settings menu
+                break;
+            case RESULTS:
+                // POTENTIAL PREVIOUS STATES: paused (ended round), playing
+                setGameplayPaused(true); // [1] disable movement and pause the timer
+                setDrawGameplayObjects(false); // [3] disable Character, floor, and skill drawing.
+                setDrawDarkTransparentScreen(true); // [5] enable drawing the dark transparent screen that makes other menus more visible
+                setDrawPauseMenu(false); // [8] disable drawing the pause menu
+                setDrawResultsMenu(true); // [9] enable drawing the results menu
+                break;
+            case LEVEL_UP:
+                // POTENTIAL PREVIOUS STATES: playing
+                setGameplayPaused(true); // [1] disable movement and pause the timer
+                setDrawGameplayObjects(false); // [3] disable Character, floor, and skill drawing.
+                setDrawDarkTransparentScreen(true); // [5] enable drawing the dark transparent screen that makes other menus more visible
+                setDrawLevelUpMenu(true); // [10] enable drawing the level_up menu
+                break;
+            case UPGRADES:
+                // POTENTIAL PREVIOUS STATES: main_menu
+                setDrawDarkTransparentScreen(true); // [5] enable drawing the dark transparent screen that makes other menus more visible
+                setDrawUpgradesMenu(true); // [11] enable drawing the upgrades menu
+                break;
+            case SETTINGS:
+                // POTENTIAL PREVIOUS STATES: paused, main_menu
+                setDrawDarkTransparentScreen(true); // [5] enable drawing the dark transparent screen that makes other menus more visible
+                setDrawSettingsMenu(true); // [12] enable drawing the settings menu
+                break;
+        }
+    }
+
+    public void setGameplayPaused(boolean gameplayPaused) {
+        isGameplayPaused = gameplayPaused;
+    }
+
+    public void setDrawGameplayObjects(boolean drawGameplayObjects) {
+        this.isDrawGameplayObjects = drawGameplayObjects;
+    }
+
+    public void setDrawMainMenu(boolean drawMainMenu) {
+        this.isDrawMainMenu = drawMainMenu;
+    }
+
+    public void setDrawDarkTransparentScreen(boolean drawDarkTransparentScreen) {
+        this.isDrawDarkTransparentScreen = drawDarkTransparentScreen;
+    }
+
+    public void setDrawPauseMenu(boolean drawPauseMenu) {
+        this.isDrawPauseMenu = drawPauseMenu;
+    }
+
+    public void setDrawResultsMenu(boolean drawResultsMenu) {
+        this.isDrawResultsMenu = drawResultsMenu;
+    }
+
+    public void setDrawLevelUpMenu(boolean drawLevelUpMenu) {
+        this.isDrawLevelUpMenu = drawLevelUpMenu;
+    }
+
+    public void setDrawUpgradesMenu(boolean drawUpgradesMenu) {
+        this.isDrawUpgradesMenu = drawUpgradesMenu;
+    }
+
+    public void setDrawSettingsMenu(boolean drawSettingsMenu) {
+        this.isDrawSettingsMenu = drawSettingsMenu;
     }
 }
 
