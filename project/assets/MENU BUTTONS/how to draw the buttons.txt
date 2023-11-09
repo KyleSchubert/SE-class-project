@@ -3,7 +3,7 @@ Then also turn off the background on the page (on <body>)
 And move the button down so that it is in the white area of the screen (may have to shrink the game area or use a vertical monitor to avoid needing to zoom out)
 After go in paint.net and use the magic wand to remove the white background
 
-untoggle   width: 200px;   from   #skillMenuButton   and   #bottomScreenArea
+untoggle   width: __px;   from   #skillMenuButton   and   #bottomScreenArea
 
 on #skillMenuButton:
 for hover:   linear-gradient(#00b8cb, #00273b)
