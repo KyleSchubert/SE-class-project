@@ -189,6 +189,23 @@
 		<allow_sleep/>
 	</body>
 
+	<body name="hitbox">
+		<is_dynamic/>
+		<linear_damping>0</linear_damping>
+		<angular_damping>0</angular_damping>
+		<is_bullet/>
+		<fixture>
+			<density>2</density>
+			<friction>0</friction>
+			<restitution>0</restitution>
+			<filter_category_bits>1</filter_category_bits>
+			<filter_mask_bits>65535</filter_mask_bits>
+			<filter_group_index>0</filter_group_index>
+			<is_sensor/>
+			<polygon>10.0000, 52.0000, 10.0000, 12.0000, 50.0000, 12.0000, 50.0000, 52.0000</polygon>
+		</fixture>
+	</body>
+
 	<metadata>
 		<format>1</format>
 		<ptm_ratio>32</ptm_ratio>
