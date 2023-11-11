@@ -26,6 +26,7 @@ import com.codeandweb.physicseditor.PhysicsShapeCache;
 import java.util.ArrayList;
 import java.util.Random;
 
+import static com.survivors.mygame.Character.CharacterState.DEAD;
 import static com.survivors.mygame.Character.CharacterState.DYING;
 
 
@@ -463,6 +464,14 @@ public class MyGame extends ApplicationAdapter {
         }
         // DEBUG WIREFRAME:
         debugRenderer.render(world, camera.combined);
+
+        // TODO: remove this. This is just for testing the DEAD state and if the enemies die when their hp goes to 0
+        for (int i = enemies.size() - 1; i >= 0; i--) {
+            if (enemies.get(i).getState() == DEAD) { // TODO: make things of state DYING not able to be collided with
+                world.destroyBody(enemies.get(i).getBody());
+                enemies.remove(i);
+            }
+        }
     }
 
     @Override
@@ -526,7 +535,7 @@ public class MyGame extends ApplicationAdapter {
 
                 // Part 4)
                 // SHOULD only increment when player is in a level and unpaused
-                timeElapsedInGame += delta;
+                timeElapsedInGame += STEP_TIME;
                 int minutes = (int) timeElapsedInGame / 60;
                 int seconds = (int) timeElapsedInGame - minutes * 60;
                 if (seconds < 10) {
@@ -566,21 +575,12 @@ public class MyGame extends ApplicationAdapter {
      *       In the future I may want to have each enemy tell a global array when said enemy
      *       dies, this way we don't need to loop through every enemy in-game every frame. */
     public void removeStaleEnemies() {
-
-        Array<Integer> indicesToRemove = new Array<>();
-
-        int curIndex = 0;
-        for (Enemy E : activeEnemies) {
-            if (E.getState() == DYING || isOutOfCamera(E, playerCharacter) && E.fromOldWave()) {
-                indicesToRemove.add(curIndex);
+        for (int i = activeEnemies.size - 1; i >= 0; i--) {
+            if (activeEnemies.get(i).getState() == DEAD || isOutOfCamera(activeEnemies.get(i), playerCharacter) && activeEnemies.get(i).fromOldWave()) {
+                enemyPool.free(activeEnemies.get(i));
+                world.destroyBody(activeEnemies.get(i).getBody());
+                activeEnemies.removeIndex(i);
             }
-            curIndex++;
-        }
-
-        // removing from right-to-left so indices stay intact
-        for (int i = indicesToRemove.size - 1; i >= 0; i--) {
-            enemyPool.free(activeEnemies.items[indicesToRemove.items[i]]);
-            activeEnemies.removeIndex(indicesToRemove.items[i]);
         }
     }
 

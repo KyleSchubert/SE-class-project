@@ -10,7 +10,7 @@ import static com.survivors.mygame.MyGame.SCALE_FACTOR;
 
 public class Character extends Mobile {
     public enum CharacterState {
-        DYING, MOVING, STANDING, ATTACKING
+        DYING, MOVING, STANDING, ATTACKING, DEAD
     }
 
     public enum CharacterTypeName {
@@ -57,6 +57,8 @@ public class Character extends Mobile {
     }
 
     /**
+     * Also, don't set to the DEAD state here. It happens automatically
+     *
      * @param state The state of the character that you want it to be changed to. Ex: Character.CharacterState.MOVING
      */
     public void setState(CharacterState state) {
@@ -67,7 +69,7 @@ public class Character extends Mobile {
                 this.state = state;
             }
             prepareFrameStartAndEndIndex();
-            this.frame = this.stateFrameEndIndex;
+            this.frame = this.stateFrameStartIndex;
         }
     }
 
@@ -106,6 +108,10 @@ public class Character extends Mobile {
         this.frameTime += elapsedTime;
         if (this.frame == this.stateFrameEndIndex) {
             if (this.frameTime > ALL_CHARACTER_DATA.get(dataIndex).getAllAnimationFrameDelays().get(this.stateFrameStartIndex)) {
+                if (this.state == CharacterState.DYING) {
+                    this.state = CharacterState.DEAD; // ONLY settable here
+                    return;
+                }
                 this.frame = this.stateFrameStartIndex;
                 this.frameTime -= ALL_CHARACTER_DATA.get(dataIndex).getAllAnimationFrameDelays().get(this.stateFrameStartIndex);
             }

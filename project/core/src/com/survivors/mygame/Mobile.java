@@ -31,4 +31,8 @@ public class Mobile {
         Vector2 vector2 = new Vector2(x, y).nor().scl(speedScalar);
         this.body.setLinearVelocity(vector2);
     }
+
+    public Body getBody() {
+        return body;
+    }
 }
