@@ -378,6 +378,7 @@ public class MyGame extends ApplicationAdapter {
         testEnemy5.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
         testEnemy6.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
         for (Enemy enemy : enemies) {
+            //enemy.takeDamage(100);
             enemy.animate(batch, elapsedTime);
         }
         playerCharacter.animate(batch, elapsedTime);

@@ -28,6 +28,7 @@ public class CharacterData {
     private int dimensionX;
     private int dimensionY;
     private String internalName = "";
+    private int maxHp;
     private int totalFrameCount;
     private int dyingAnimationStartFrameIndex;
     private int dyingAnimationEndFrameIndex;
@@ -57,6 +58,7 @@ public class CharacterData {
                 this.originY = 62;
                 this.dimensionX = 188;
                 this.dimensionY = 86;
+                this.maxHp = 1000;
                 break;
             case PLANT:
                 this.internalName = "plant";
@@ -67,6 +69,7 @@ public class CharacterData {
                 this.originY = 103;
                 this.dimensionX = 252;
                 this.dimensionY = 134;
+                this.maxHp = 1800;
                 break;
             case STUMP:
                 this.internalName = "stump";
@@ -77,6 +80,7 @@ public class CharacterData {
                 this.originY = 130;
                 this.dimensionX = 126;
                 this.dimensionY = 167;
+                this.maxHp = 7000;
                 break;
             case PIG:
                 this.internalName = "pig";
@@ -87,6 +91,7 @@ public class CharacterData {
                 this.originY = 74;
                 this.dimensionX = 96;
                 this.dimensionY = 108;
+                this.maxHp = 3200;
                 break;
             case ORANGE_MUSHROOM:
                 this.internalName = "orange mushroom";
@@ -97,6 +102,7 @@ public class CharacterData {
                 this.originY = 88;
                 this.dimensionX = 81;
                 this.dimensionY = 121;
+                this.maxHp = 5500;
                 break;
             case BLUE_MUSHROOM:
                 this.internalName = "blue mushroom";
@@ -107,6 +113,7 @@ public class CharacterData {
                 this.originY = 126;
                 this.dimensionX = 242;
                 this.dimensionY = 194;
+                this.maxHp = 11000;
                 break;
             case ZOMBIE_MUSHROOM:
                 this.internalName = "zombie mushroom";
@@ -117,6 +124,7 @@ public class CharacterData {
                 this.originY = 106;
                 this.dimensionX = 80;
                 this.dimensionY = 157;
+                this.maxHp = 20000;
                 break;
             case HELMET_PENGUIN:
                 this.internalName = "helmet penguin";
@@ -127,6 +135,7 @@ public class CharacterData {
                 this.originY = 194;
                 this.dimensionX = 488;
                 this.dimensionY = 292;
+                this.maxHp = 40000;
                 break;
             case SPEAR_PENGUIN:
                 this.internalName = "spear penguin";
@@ -139,6 +148,7 @@ public class CharacterData {
                 this.originY = 150;
                 this.dimensionX = 494;
                 this.dimensionY = 236;
+                this.maxHp = 30000;
                 break;
             case SMALL_PENGUIN:
                 this.internalName = "small penguin";
@@ -149,6 +159,7 @@ public class CharacterData {
                 this.originY = 47;
                 this.dimensionX = 94;
                 this.dimensionY = 62;
+                this.maxHp = 6500;
                 break;
             // Nick: placeholder internal name for a void enemy
             case VOID:
@@ -292,7 +303,12 @@ public class CharacterData {
     public int getOriginY() {
         return originY;
     }
+
     public String getInternalName() {
         return internalName;
+    }
+
+    public int getMaxHp() {
+        return maxHp;
     }
 }

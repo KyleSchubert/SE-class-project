@@ -34,6 +34,7 @@ public class Character extends Mobile {
     private int stateFrameStartIndex = 0;
     private int stateFrameEndIndex = 0;
     private int isFacingLeft = 1;
+    private int currentHp;
 
     /**
      * @param characterTypeName The type of the character that will be created. This is an enum: CharacterTypeName
@@ -44,6 +45,7 @@ public class Character extends Mobile {
         this.dataIndex = characterTypeName.ordinal();
         if (!ALL_CHARACTER_DATA.get(dataIndex).getInternalName().equals("void")) {
             this.makeBody(ALL_CHARACTER_DATA.get(dataIndex).getInternalName(), x, y, 0, world, physicsShapeCache);
+            this.currentHp = ALL_CHARACTER_DATA.get(dataIndex).getMaxHp();
         }
         this.setState(CharacterState.STANDING);
     }
@@ -143,5 +145,23 @@ public class Character extends Mobile {
 
     public void setDataIndex(int dataIndex) {
         this.dataIndex = dataIndex;
+    }
+
+    public void setCurrentHp(int currentHp) {
+        this.currentHp = currentHp;
+    }
+
+    /**
+     * Call this when a character should take damage. It also handles when they should die.
+     * Enemies have at least 1000 Hp. Essentially, it's just (normal Hp number)*100.
+     * Taking damage should always happen before animating, so that enemies with the DYING state can become DEAD.
+     *
+     * @param amountOfDamage the amount of damage the character will take.
+     */
+    public void takeDamage(int amountOfDamage) {
+        this.currentHp -= amountOfDamage;
+        if (this.currentHp <= 0) {
+            this.setState(CharacterState.DYING);
+        }
     }
 }

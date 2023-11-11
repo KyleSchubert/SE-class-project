@@ -35,6 +35,7 @@ public class Enemy extends Character {
      *       of a new instance */
     public void init(CharacterTypeName characterTypeName, float x, float y, int curWave, World world, PhysicsShapeCache physicsShapeCache) {
         this.setDataIndex(characterTypeName.ordinal());
+        this.setCurrentHp(ALL_CHARACTER_DATA.get(this.getDataIndex()).getMaxHp());
         this.makeBody(ALL_CHARACTER_DATA.get(this.getDataIndex()).getInternalName(), x, y, 0, world, physicsShapeCache);
         this.setState(CharacterState.STANDING);
         spawnedWave = curWave;
