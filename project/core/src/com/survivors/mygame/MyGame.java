@@ -2,6 +2,7 @@ package com.survivors.mygame;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -43,6 +44,11 @@ public class MyGame extends ApplicationAdapter {
     OrthographicCamera camera;
     ScreenViewport viewportForStage;
     Stage mainMenuStage;
+    Stage pauseMenuStage;
+    Stage resultsMenuStage;
+    Stage levelUpMenuStage;
+    Stage upgradesMenuStage;
+    Stage settingsMenuStage;
     public int amountOfCurrency;
     BitmapFont font;
     Image currencyCounterImage;
@@ -50,6 +56,22 @@ public class MyGame extends ApplicationAdapter {
     ImageButton upgradesButton;
     ImageButton settingsButton;
     ImageButton exitButton;
+    ImageButton resumeButton;
+    ImageButton giveUpButton;
+    ImageButton pauseSettingsButton;
+    ImageButton mainMenuButton;
+    ImageButton levelUpConfirmButton1;
+    ImageButton levelUpConfirmButton2;
+    ImageButton levelUpConfirmButton3;
+    ImageButton upgradesBackButton;
+    ImageButton resetButton;
+    ImageButton settingsBackButton;
+    ImageButton settingsConfirmButton;
+    Image darkTransparentScreen;
+    Image pauseBackground;
+    Image resultsBackground;
+    Image settingsBackground;
+    Image upgradesBackground;
     Texture theFloor;
     public static final Array<CharacterData> ALL_CHARACTER_DATA = new Array<>();
     Box2DDebugRenderer debugRenderer;
@@ -94,7 +116,7 @@ public class MyGame extends ApplicationAdapter {
 
     // Menu variables and stuff below:
     public enum MenuState {
-        MAIN_MENU, PLAYING, PAUSED, RESULTS, LEVEL_UP, UPGRADES, SETTINGS
+        MAIN_MENU, PLAYING, PAUSED, RESULTS, LEVEL_UP, UPGRADES, SETTINGS_BACK, SETTINGS
     }
 
     protected boolean isGameplayPaused; // [1] is the corresponding action in setMenuState()
@@ -134,6 +156,11 @@ public class MyGame extends ApplicationAdapter {
         viewportForStage = new ScreenViewport(camera);
         viewportForStage.setUnitsPerPixel(SCALE_FACTOR);
         mainMenuStage = new Stage(viewportForStage);
+        pauseMenuStage = new Stage(viewportForStage);
+        resultsMenuStage = new Stage(viewportForStage);
+        levelUpMenuStage = new Stage(viewportForStage);
+        upgradesMenuStage = new Stage(viewportForStage);
+        settingsMenuStage = new Stage(viewportForStage);
 
         Gdx.input.setInputProcessor(mainMenuStage);
 
@@ -148,64 +175,15 @@ public class MyGame extends ApplicationAdapter {
 
         // Menu buttons below
         // PLAY button
-        playButton = new ImageButton(
-                new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("MENU BUTTONS/play/default.png")))),
-                new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("MENU BUTTONS/play/hover.png"))))
-        );
-        playButton.setSize(362 * SCALE_FACTOR, 122 * SCALE_FACTOR);
-        playButton.addListener(new InputListener() {
-            @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                setMenuState(MenuState.PLAYING);
-            }
-
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                return true;
-            }
-        });
+        playButton = newImageButtonFrom("play", MenuState.PLAYING);
         mainMenuStage.addActor(playButton);
 
         // UPGRADES button
-        upgradesButton = new ImageButton(
-                new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("MENU BUTTONS/upgrades/default.png")))),
-                new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("MENU BUTTONS/upgrades/hover.png"))))
-        );
-        upgradesButton.setSize(248 * SCALE_FACTOR, 72 * SCALE_FACTOR);
-        upgradesButton.addListener(new InputListener() {
-            @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                System.out.println("CLICKED UP");
-                amountOfCurrency += 10;
-            }
-
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                System.out.println("CLICKED DOWN");
-                return true;
-            }
-        });
+        upgradesButton = newImageButtonFrom("upgrades", MenuState.UPGRADES);
         mainMenuStage.addActor(upgradesButton);
 
         // SETTINGS button
-        settingsButton = new ImageButton(
-                new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("MENU BUTTONS/settings/default.png")))),
-                new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("MENU BUTTONS/settings/hover.png"))))
-        );
-        settingsButton.setSize(224 * SCALE_FACTOR, 72 * SCALE_FACTOR);
-        settingsButton.addListener(new InputListener() {
-            @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                System.out.println("CLICKED UP");
-                amountOfCurrency += 100;
-            }
-
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                System.out.println("CLICKED DOWN");
-                return true;
-            }
-        });
+        settingsButton = newImageButtonFrom("settings", MenuState.SETTINGS);
         mainMenuStage.addActor(settingsButton);
 
         // EXIT button
@@ -227,6 +205,74 @@ public class MyGame extends ApplicationAdapter {
             }
         });
         mainMenuStage.addActor(exitButton);
+
+        // Dark transparent screen
+        darkTransparentScreen = new Image(new Texture(Gdx.files.internal("MENU backgrounds/dark transparent screen.png")));
+        darkTransparentScreen.setSize(40 * SCALE_FACTOR * 300, 40 * SCALE_FACTOR * 300);
+
+        // Pause background
+        pauseBackground = new Image(new Texture(Gdx.files.internal("MENU backgrounds/pause background.png")));
+        pauseBackground.setSize(296 * SCALE_FACTOR, 287 * SCALE_FACTOR);
+
+        // Results background
+        resultsBackground = new Image(new Texture(Gdx.files.internal("MENU backgrounds/results background.png")));
+        resultsBackground.setSize(429 * SCALE_FACTOR, 844 * SCALE_FACTOR);
+
+        // Settings background
+        settingsBackground = new Image(new Texture(Gdx.files.internal("MENU backgrounds/settings background.png")));
+        settingsBackground.setSize(771 * SCALE_FACTOR, 814 * SCALE_FACTOR);
+
+        // Upgrades background
+        upgradesBackground = new Image(new Texture(Gdx.files.internal("MENU backgrounds/upgrades background.png")));
+        upgradesBackground.setSize(873 * SCALE_FACTOR, 814 * SCALE_FACTOR);
+
+        // Pause menu buttons
+        // Resume button
+        resumeButton = newImageButtonFrom("resume", MenuState.PLAYING);
+        pauseMenuStage.addActor(resumeButton);
+
+        // Settings button
+        pauseSettingsButton = newImageButtonFrom("settings", MenuState.SETTINGS);
+        pauseMenuStage.addActor(pauseSettingsButton);
+
+        // Give up button
+        giveUpButton = newImageButtonFrom("give up", MenuState.RESULTS);
+        pauseMenuStage.addActor(giveUpButton);
+
+        // Results menu buttons
+        // Main menu button
+        mainMenuButton = newImageButtonFrom("main menu", MenuState.MAIN_MENU);
+        resultsMenuStage.addActor(mainMenuButton);
+
+        // Level up menu buttons
+        // TODO: these will need more code in order to grant the player their corresponding reward, of course
+        levelUpConfirmButton1 = newImageButtonFrom("confirm", MenuState.PLAYING);
+        levelUpConfirmButton2 = newImageButtonFrom("confirm", MenuState.PLAYING);
+        levelUpConfirmButton3 = newImageButtonFrom("confirm", MenuState.PLAYING);
+        levelUpMenuStage.addActor(levelUpConfirmButton1);
+        levelUpMenuStage.addActor(levelUpConfirmButton2);
+        levelUpMenuStage.addActor(levelUpConfirmButton3);
+
+        // Upgrades menu buttons
+        // Back button
+        upgradesBackButton = newImageButtonFrom("back", MenuState.MAIN_MENU);
+        upgradesMenuStage.addActor(upgradesBackButton);
+
+        // Reset button (for resetting all upgrades and returning the in-game currency spent on them)
+        // TODO: this will need additional code to refund all the upgrades
+        resetButton = newImageButtonFrom("reset", MenuState.UPGRADES);
+        upgradesMenuStage.addActor(resetButton);
+
+        // Settings menu buttons
+        // Back button
+        // TODO: this will need additional code to discard the changed settings
+        settingsBackButton = newImageButtonFrom("back", MenuState.SETTINGS_BACK);
+        settingsMenuStage.addActor(settingsBackButton);
+
+        // confirm button
+        // TODO: this will need additional code to save and apply the changed settings
+        settingsConfirmButton = newImageButtonFrom("confirm", MenuState.SETTINGS_BACK);
+        settingsMenuStage.addActor(settingsConfirmButton);
 
         // WAVES
         Array<Wave> temporaryArrayOfWavesBeforeWeMakeAWavelistFile = new Array<>();
@@ -295,7 +341,6 @@ public class MyGame extends ApplicationAdapter {
         setMenuState(MenuState.MAIN_MENU);
     }
 
-
     @Override
     public void render() {
         float elapsedTime = stepWorld();
@@ -306,38 +351,40 @@ public class MyGame extends ApplicationAdapter {
         viewport.apply();
 
         batch.begin();
-        if (this.isDrawGameplayObjects) {
-            batch.draw(theFloor,
-                    playerCharacter.getX() - 2160 * SCALE_FACTOR, playerCharacter.getY() - 1350 * SCALE_FACTOR,
-                    0, 0,
-                    4320, 2700,
-                    SCALE_FACTOR, SCALE_FACTOR,
-                    0,
-                    (int) (playerCharacter.getX() * 1 / SCALE_FACTOR), -(int) (playerCharacter.getY() * 1 / SCALE_FACTOR),
-                    4320, 2700,
-                    false, false
-            );
-            // Nick: animate each enemy in current list pulled from the pool
-            for (Enemy E : activeEnemies) {
-                E.animate(batch, elapsedTime);
-            }
-
-            testEnemy.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
-            testEnemy2.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
-            testEnemy3.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
-            testEnemy4.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
-            testEnemy5.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
-            testEnemy6.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
-            for (Enemy enemy : enemies) {
-                enemy.animate(batch, elapsedTime);
-            }
-            playerCharacter.animate(batch, elapsedTime);
+        batch.draw(theFloor,
+                playerCharacter.getX() - 2160 * SCALE_FACTOR, playerCharacter.getY() - 1350 * SCALE_FACTOR,
+                0, 0,
+                4320, 2700,
+                SCALE_FACTOR, SCALE_FACTOR,
+                0,
+                (int) (playerCharacter.getX() * 1 / SCALE_FACTOR), -(int) (playerCharacter.getY() * 1 / SCALE_FACTOR),
+                4320, 2700,
+                false, false
+        );
+        if (!this.isDrawGameplayObjects) {
+            elapsedTime = 0.0f;
         }
+
+        // Nick: animate each enemy in current list pulled from the pool
+        for (Enemy E : activeEnemies) {
+            E.animate(batch, elapsedTime);
+        }
+
+        testEnemy.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
+        testEnemy2.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
+        testEnemy3.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
+        testEnemy4.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
+        testEnemy5.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
+        testEnemy6.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
+        for (Enemy enemy : enemies) {
+            enemy.animate(batch, elapsedTime);
+        }
+        playerCharacter.animate(batch, elapsedTime);
+
         if (this.isDrawMainMenu) {
             font.draw(batch, "x " + amountOfCurrency, playerCharacter.getX() - 19.2f, playerCharacter.getY() - 9.7f); // text for currency counter
         }
         font.draw(batch, timeText, playerCharacter.getX() - 1.4f, playerCharacter.getY() + 22.6f); // text for time elapsed in game
-        batch.end();
 
         if (this.isDrawMainMenu) {
             mainMenuStage.getActors().get(0).setPosition(playerCharacter.getX() - 21, playerCharacter.getY() - 11); // currencyCounterImage
@@ -350,22 +397,69 @@ public class MyGame extends ApplicationAdapter {
             mainMenuStage.draw();
         }
         if (this.isDrawDarkTransparentScreen) {
-            // draw the dark transparent screen (that either prevents clicking other menu buttons or those other buttons should be temporarily disabled)
+            // draw the dark transparent screen
+            darkTransparentScreen.setPosition(playerCharacter.getX() - 100, playerCharacter.getY() - 100);
+            darkTransparentScreen.draw(batch, 1);
+        }
+        if (this.isDrawPauseMenu) { // JUST for the pause menu background texture
+            pauseBackground.setPosition(playerCharacter.getX() - 7.5f, playerCharacter.getY() - 5);
+            pauseBackground.draw(batch, 1);
+        }
+        if (this.isDrawUpgradesMenu) { // JUST for the upgrades menu background texture
+            upgradesBackground.setPosition(playerCharacter.getX() - 14, playerCharacter.getY() - 21.3f);
+            upgradesBackground.draw(batch, 1);
+        }
+        if (this.isDrawResultsMenu) { // JUST for the results menu background texture
+            resultsBackground.setPosition(playerCharacter.getX() + 11, playerCharacter.getY() - 21.3f);
+            resultsBackground.draw(batch, 1);
+        }
+        if (this.isDrawSettingsMenu) { // JUST for the settings menu background texture
+            settingsBackground.setPosition(playerCharacter.getX() - 13.3f, playerCharacter.getY() - 21.3f);
+            settingsBackground.draw(batch, 1);
+        }
+        // TODO: add a level up menu background texture
+        batch.end();
+
+        if (this.isDrawPauseMenu) {
+            // draw the pause menu
+            pauseMenuStage.getActors().get(0).setPosition(playerCharacter.getX() - 6, playerCharacter.getY() + 4.2f); // resume button
+            pauseMenuStage.getActors().get(1).setPosition(playerCharacter.getX() - 6, playerCharacter.getY() + 0.1f); // settings button
+            pauseMenuStage.getActors().get(2).setPosition(playerCharacter.getX() - 5.5f, playerCharacter.getY() - 4.5f); // give up button
+            pauseMenuStage.getViewport().apply();
+            pauseMenuStage.act(elapsedTime);
+            pauseMenuStage.draw();
         }
         if (this.isDrawLevelUpMenu) {
             // draw the level-up menu
-        }
-        if (this.isDrawPauseMenu) {
-            // draw the pause menu
-        }
-        if (this.isDrawResultsMenu) {
-            // draw the results menu
+            levelUpMenuStage.getActors().get(0).setPosition(playerCharacter.getX() - 15, playerCharacter.getY() - 16); // confirm button 1
+            levelUpMenuStage.getActors().get(1).setPosition(playerCharacter.getX() - 0, playerCharacter.getY() - 16); // confirm button 2
+            levelUpMenuStage.getActors().get(2).setPosition(playerCharacter.getX() + 15, playerCharacter.getY() - 16); // confirm button 3
+            levelUpMenuStage.getViewport().apply();
+            levelUpMenuStage.act(elapsedTime);
+            levelUpMenuStage.draw();
         }
         if (this.isDrawUpgradesMenu) {
             // draw the upgrades menu
+            upgradesMenuStage.getActors().get(0).setPosition(playerCharacter.getX() - 12, playerCharacter.getY() - 20); // back button
+            upgradesMenuStage.getActors().get(1).setPosition(playerCharacter.getX() + 18, playerCharacter.getY() - 20); // reset button
+            upgradesMenuStage.getViewport().apply();
+            upgradesMenuStage.act(elapsedTime);
+            upgradesMenuStage.draw();
+        }
+        if (this.isDrawResultsMenu) {
+            // draw the results menu
+            resultsMenuStage.getActors().get(0).setPosition(playerCharacter.getX() + 15, playerCharacter.getY() - 20); // main menu button
+            resultsMenuStage.getViewport().apply();
+            resultsMenuStage.act(elapsedTime);
+            resultsMenuStage.draw();
         }
         if (this.isDrawSettingsMenu) {
             // draw the settings menu
+            settingsMenuStage.getActors().get(0).setPosition(playerCharacter.getX() - 12, playerCharacter.getY() - 20); // back button
+            settingsMenuStage.getActors().get(1).setPosition(playerCharacter.getX() + 12, playerCharacter.getY() - 20); // confirm button
+            settingsMenuStage.getViewport().apply();
+            settingsMenuStage.act(elapsedTime);
+            settingsMenuStage.draw();
         }
         // DEBUG WIREFRAME:
         debugRenderer.render(world, camera.combined);
@@ -386,6 +480,11 @@ public class MyGame extends ApplicationAdapter {
         theFloor.dispose();
         physicsShapeCache.dispose();
         mainMenuStage.dispose();
+        pauseMenuStage.dispose();
+        resultsMenuStage.dispose();
+        levelUpMenuStage.dispose();
+        upgradesMenuStage.dispose();
+        settingsMenuStage.dispose();
         font.dispose();
     }
 
@@ -444,6 +543,10 @@ public class MyGame extends ApplicationAdapter {
 
                 // Do keyChecks here
                 playerCharacter.keyCheck();
+                // Check for ESCAPE key -- Toggle pause menu
+                if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
+                    setMenuState(MenuState.PAUSED);
+                }
                 world.step(STEP_TIME, VELOCITY_ITERATIONS, POSITION_ITERATIONS);
             }
             return STEP_TIME;
@@ -532,6 +635,7 @@ public class MyGame extends ApplicationAdapter {
             case MAIN_MENU:
                 // GAME STARTS IN THIS STATE
                 // POTENTIAL PREVIOUS STATES: upgrades, settings, results
+                Gdx.input.setInputProcessor(mainMenuStage);
                 setGameplayPaused(true); // [1] disable movement and pause the timer
                 // [2] reset PlayerCharacter.
                 playerCharacter.setState(Character.CharacterState.STANDING);
@@ -564,6 +668,7 @@ public class MyGame extends ApplicationAdapter {
                 break;
             case PAUSED:
                 // POTENTIAL PREVIOUS STATES: playing, settings
+                Gdx.input.setInputProcessor(pauseMenuStage);
                 setGameplayPaused(true); // [1] disable movement and pause the timer
                 setDrawGameplayObjects(false); // [3] disable Character, floor, and skill drawing.
                 setDrawDarkTransparentScreen(true); // [5] enable drawing the dark transparent screen that makes other menus more visible
@@ -572,6 +677,7 @@ public class MyGame extends ApplicationAdapter {
                 break;
             case RESULTS:
                 // POTENTIAL PREVIOUS STATES: paused (ended round), playing
+                Gdx.input.setInputProcessor(resultsMenuStage);
                 setGameplayPaused(true); // [1] disable movement and pause the timer
                 setDrawGameplayObjects(false); // [3] disable Character, floor, and skill drawing.
                 setDrawDarkTransparentScreen(true); // [5] enable drawing the dark transparent screen that makes other menus more visible
@@ -580,6 +686,7 @@ public class MyGame extends ApplicationAdapter {
                 break;
             case LEVEL_UP:
                 // POTENTIAL PREVIOUS STATES: playing
+                Gdx.input.setInputProcessor(levelUpMenuStage);
                 setGameplayPaused(true); // [1] disable movement and pause the timer
                 setDrawGameplayObjects(false); // [3] disable Character, floor, and skill drawing.
                 setDrawDarkTransparentScreen(true); // [5] enable drawing the dark transparent screen that makes other menus more visible
@@ -587,13 +694,26 @@ public class MyGame extends ApplicationAdapter {
                 break;
             case UPGRADES:
                 // POTENTIAL PREVIOUS STATES: main_menu
+                Gdx.input.setInputProcessor(upgradesMenuStage);
                 setDrawDarkTransparentScreen(true); // [5] enable drawing the dark transparent screen that makes other menus more visible
                 setDrawUpgradesMenu(true); // [11] enable drawing the upgrades menu
                 break;
             case SETTINGS:
                 // POTENTIAL PREVIOUS STATES: paused, main_menu
+                Gdx.input.setInputProcessor(settingsMenuStage);
                 setDrawDarkTransparentScreen(true); // [5] enable drawing the dark transparent screen that makes other menus more visible
+                setDrawPauseMenu(false); // [8] enable drawing the pause menu
                 setDrawSettingsMenu(true); // [12] enable drawing the settings menu
+                break;
+            case SETTINGS_BACK: // exclusive to the buttons in the settings menu
+                if (isDrawMainMenu) {
+                    Gdx.input.setInputProcessor(mainMenuStage);
+                    setDrawDarkTransparentScreen(false); // [5] disable drawing the dark transparent screen that makes other menus more visible
+                } else {
+                    Gdx.input.setInputProcessor(pauseMenuStage);
+                    setDrawPauseMenu(true); // [8] enable drawing the pause menu
+                }
+                setDrawSettingsMenu(false); // [12] disable drawing the settings menu
                 break;
         }
     }
@@ -632,6 +752,29 @@ public class MyGame extends ApplicationAdapter {
 
     public void setDrawSettingsMenu(boolean drawSettingsMenu) {
         this.isDrawSettingsMenu = drawSettingsMenu;
+    }
+
+    private ImageButton newImageButtonFrom(String buttonInternalFolderName, final MenuState menuState) {
+        Texture notClickedTexture = new Texture(Gdx.files.internal("MENU BUTTONS/" + buttonInternalFolderName + "/default.png"));
+        Texture clickedTexture = new Texture(Gdx.files.internal("MENU BUTTONS/" + buttonInternalFolderName + "/hover.png"));
+        ImageButton button = new ImageButton(
+                new TextureRegionDrawable(new TextureRegion(notClickedTexture)),
+                new TextureRegionDrawable(new TextureRegion(clickedTexture))
+        );
+        button.setSize(notClickedTexture.getWidth() * SCALE_FACTOR, notClickedTexture.getHeight() * SCALE_FACTOR);
+        button.addListener(new InputListener() {
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                setMenuState(menuState);
+            }
+
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                return true;
+            }
+        });
+
+        return button;
     }
 }
 
