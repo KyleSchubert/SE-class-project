@@ -26,12 +26,15 @@ public class WaveList {
     static String enemyPairRegex = "([a-zA-Z]+) +([0-9]+)";
     static Pattern PairPattern = Pattern.compile(enemyPairRegex);
 
+    /*
     // May add another constructor that builds a list of waves from a text file
     public WaveList(Array<Wave> WL) {
         waveList = WL;
         curWave = 0;
         isEmpty = false;
     }
+
+     */
 
     // Builds a wave list from a text file
     public WaveList(String waveFilePath) throws FileNotFoundException {
@@ -129,4 +132,3 @@ public class WaveList {
     }
 
 }
-
