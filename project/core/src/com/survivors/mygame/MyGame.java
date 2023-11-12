@@ -24,6 +24,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.codeandweb.physicseditor.PhysicsShapeCache;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -288,8 +289,12 @@ public class MyGame extends ApplicationAdapter {
         settingsMenuStage.addActor(settingsConfirmButton);
 
         // WAVES
-        Array<Wave> temporaryArrayOfWavesBeforeWeMakeAWavelistFile = new Array<>();
-        theWaveList = new WaveList(temporaryArrayOfWavesBeforeWeMakeAWavelistFile);
+        // Array<Wave> temporaryArrayOfWavesBeforeWeMakeAWavelistFile = new Array<>();
+        try {
+            theWaveList = new WaveList("SampleWaves.txt");
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
 
         testEnemy = new Enemy();
         testEnemy.init(Character.CharacterTypeName.BIRD, 3.2f, 4.2f, 0, world, physicsShapeCache);
