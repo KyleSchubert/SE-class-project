@@ -25,7 +25,7 @@ public class WaveList {
     // Regex for matching (enemyType, number) pairs from a wave file
     static String enemyPairRegex = "([a-zA-Z]+) +([0-9]+)";
     static Pattern PairPattern = Pattern.compile(enemyPairRegex);
-    
+
     // May add another constructor that builds a list of waves from a text file
     public WaveList(Array<Wave> WL) {
         waveList = WL;
