@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
@@ -27,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import static com.survivors.mygame.Character.CharacterState.DEAD;
-import static com.survivors.mygame.Character.CharacterState.DYING;
 
 
 public class MyGame extends ApplicationAdapter {
@@ -75,6 +75,7 @@ public class MyGame extends ApplicationAdapter {
     Image upgradesBackground;
     Texture theFloor;
     public static final Array<CharacterData> ALL_CHARACTER_DATA = new Array<>();
+    public static final Array<AttackData> ALL_ATTACK_DATA = new Array<>();
     Box2DDebugRenderer debugRenderer;
     // Nick: moved these to global range to be used efficiently in isOutOfCamera()
     private static final float windowWidth = 1440;
@@ -130,6 +131,12 @@ public class MyGame extends ApplicationAdapter {
     private boolean isDrawUpgradesMenu; // [11] is the corresponding action in setMenuState()
     private boolean isDrawSettingsMenu; // [12] is the corresponding action in setMenuState()
     // End of menu variables and stuff
+    // For testing attacks below:
+    private float tempReuseTime = 3;
+    private float timeTracker = 0;
+    private int additionalProjectiles = 2;
+    private ArrayList<Attack> tempAttacks = new ArrayList<>();
+    // End of stuff for testing attacks
 
     @Override
     public void create() {
@@ -140,6 +147,11 @@ public class MyGame extends ApplicationAdapter {
         // Loading in each CharacterTypeName's CharacterData into allCharacterData
         for (Character.CharacterTypeName name : Character.CharacterTypeName.values()) {
             ALL_CHARACTER_DATA.add(new CharacterData(name));
+        }
+
+        // Loading in each AttackTypeName's AttackData into allCharacterData
+        for (Attack.AttackTypeName name : Attack.AttackTypeName.values()) {
+            ALL_ATTACK_DATA.add(new AttackData(name));
         }
 
         camera = new OrthographicCamera(viewWidth, viewHeight);
@@ -346,19 +358,19 @@ public class MyGame extends ApplicationAdapter {
     public void render() {
         float elapsedTime = stepWorld();
         ScreenUtils.clear(0, 0, 0, 1);
-        camera.position.set(playerCharacter.getX(), playerCharacter.getY(), 0);
+        camera.position.set(playerCharacter.getTrueX(), playerCharacter.getTrueY(), 0);
         camera.update();
         batch.setProjectionMatrix(camera.combined);
         viewport.apply();
 
         batch.begin();
         batch.draw(theFloor,
-                playerCharacter.getX() - 2160 * SCALE_FACTOR, playerCharacter.getY() - 1350 * SCALE_FACTOR,
+                playerCharacter.getTrueX() - 2160 * SCALE_FACTOR, playerCharacter.getTrueY() - 1350 * SCALE_FACTOR,
                 0, 0,
                 4320, 2700,
                 SCALE_FACTOR, SCALE_FACTOR,
                 0,
-                (int) (playerCharacter.getX() * 1 / SCALE_FACTOR), -(int) (playerCharacter.getY() * 1 / SCALE_FACTOR),
+                (int) (playerCharacter.getTrueX() * 1 / SCALE_FACTOR), -(int) (playerCharacter.getTrueY() * 1 / SCALE_FACTOR),
                 4320, 2700,
                 false, false
         );
@@ -378,45 +390,49 @@ public class MyGame extends ApplicationAdapter {
         testEnemy5.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
         testEnemy6.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
         for (Enemy enemy : enemies) {
-            //enemy.takeDamage(100);
+            //enemy.takeDamage(200);
             enemy.animate(batch, elapsedTime);
         }
         playerCharacter.animate(batch, elapsedTime);
 
-        if (this.isDrawMainMenu) {
-            font.draw(batch, "x " + amountOfCurrency, playerCharacter.getX() - 19.2f, playerCharacter.getY() - 9.7f); // text for currency counter
+        for (Attack attack : tempAttacks) {
+            attack.animate(batch, elapsedTime);
         }
-        font.draw(batch, timeText, playerCharacter.getX() - 1.4f, playerCharacter.getY() + 22.6f); // text for time elapsed in game
 
         if (this.isDrawMainMenu) {
-            mainMenuStage.getActors().get(0).setPosition(playerCharacter.getX() - 21, playerCharacter.getY() - 11); // currencyCounterImage
-            mainMenuStage.getActors().get(1).setPosition(playerCharacter.getX() - 35, playerCharacter.getY() - 7); // playButton
-            mainMenuStage.getActors().get(2).setPosition(playerCharacter.getX() - 35, playerCharacter.getY() - 12); // upgradesButton
-            mainMenuStage.getActors().get(3).setPosition(playerCharacter.getX() - 35, playerCharacter.getY() - 17); // settingsButton
-            mainMenuStage.getActors().get(4).setPosition(playerCharacter.getX() - 35, playerCharacter.getY() - 22); // exitButton
+            font.draw(batch, "x " + amountOfCurrency, playerCharacter.getTrueX() - 19.2f, playerCharacter.getTrueY() - 9.7f); // text for currency counter
+        }
+        font.draw(batch, timeText, playerCharacter.getTrueX() - 1.4f, playerCharacter.getTrueY() + 22.6f); // text for time elapsed in game
+
+        if (this.isDrawMainMenu) {
+            mainMenuStage.getActors().get(0).setPosition(playerCharacter.getTrueX() - 21, playerCharacter.getTrueY() - 11); // currencyCounterImage
+            mainMenuStage.getActors().get(1).setPosition(playerCharacter.getTrueX() - 35, playerCharacter.getTrueY() - 7); // playButton
+            mainMenuStage.getActors().get(2).setPosition(playerCharacter.getTrueX() - 35, playerCharacter.getTrueY() - 12); // upgradesButton
+            mainMenuStage.getActors().get(3).setPosition(playerCharacter.getTrueX() - 35, playerCharacter.getTrueY() - 17); // settingsButton
+            mainMenuStage.getActors().get(4).setPosition(playerCharacter.getTrueX() - 35, playerCharacter.getTrueY() - 22); // exitButton
             mainMenuStage.getViewport().apply();
             mainMenuStage.act(elapsedTime);
             mainMenuStage.draw();
         }
         if (this.isDrawDarkTransparentScreen) {
             // draw the dark transparent screen
-            darkTransparentScreen.setPosition(playerCharacter.getX() - 100, playerCharacter.getY() - 100);
+            darkTransparentScreen.setPosition(playerCharacter.getTrueX() - 100, playerCharacter.getTrueY() - 100);
             darkTransparentScreen.draw(batch, 1);
         }
         if (this.isDrawPauseMenu) { // JUST for the pause menu background texture
-            pauseBackground.setPosition(playerCharacter.getX() - 7.5f, playerCharacter.getY() - 5);
+            pauseBackground.setPosition(playerCharacter.getTrueX() - 7.5f, playerCharacter.getTrueY() - 5);
             pauseBackground.draw(batch, 1);
         }
         if (this.isDrawUpgradesMenu) { // JUST for the upgrades menu background texture
-            upgradesBackground.setPosition(playerCharacter.getX() - 14, playerCharacter.getY() - 21.3f);
+            upgradesBackground.setPosition(playerCharacter.getTrueX() - 14, playerCharacter.getTrueY() - 21.3f);
             upgradesBackground.draw(batch, 1);
         }
         if (this.isDrawResultsMenu) { // JUST for the results menu background texture
-            resultsBackground.setPosition(playerCharacter.getX() + 11, playerCharacter.getY() - 21.3f);
+            resultsBackground.setPosition(playerCharacter.getTrueX() + 11, playerCharacter.getTrueY() - 21.3f);
             resultsBackground.draw(batch, 1);
         }
         if (this.isDrawSettingsMenu) { // JUST for the settings menu background texture
-            settingsBackground.setPosition(playerCharacter.getX() - 13.3f, playerCharacter.getY() - 21.3f);
+            settingsBackground.setPosition(playerCharacter.getTrueX() - 13.3f, playerCharacter.getTrueY() - 21.3f);
             settingsBackground.draw(batch, 1);
         }
         // TODO: add a level up menu background texture
@@ -424,41 +440,41 @@ public class MyGame extends ApplicationAdapter {
 
         if (this.isDrawPauseMenu) {
             // draw the pause menu
-            pauseMenuStage.getActors().get(0).setPosition(playerCharacter.getX() - 6, playerCharacter.getY() + 4.2f); // resume button
-            pauseMenuStage.getActors().get(1).setPosition(playerCharacter.getX() - 6, playerCharacter.getY() + 0.1f); // settings button
-            pauseMenuStage.getActors().get(2).setPosition(playerCharacter.getX() - 5.5f, playerCharacter.getY() - 4.5f); // give up button
+            pauseMenuStage.getActors().get(0).setPosition(playerCharacter.getTrueX() - 6, playerCharacter.getTrueY() + 4.2f); // resume button
+            pauseMenuStage.getActors().get(1).setPosition(playerCharacter.getTrueX() - 6, playerCharacter.getTrueY() + 0.1f); // settings button
+            pauseMenuStage.getActors().get(2).setPosition(playerCharacter.getTrueX() - 5.5f, playerCharacter.getTrueY() - 4.5f); // give up button
             pauseMenuStage.getViewport().apply();
             pauseMenuStage.act(elapsedTime);
             pauseMenuStage.draw();
         }
         if (this.isDrawLevelUpMenu) {
             // draw the level-up menu
-            levelUpMenuStage.getActors().get(0).setPosition(playerCharacter.getX() - 15, playerCharacter.getY() - 16); // confirm button 1
-            levelUpMenuStage.getActors().get(1).setPosition(playerCharacter.getX() - 0, playerCharacter.getY() - 16); // confirm button 2
-            levelUpMenuStage.getActors().get(2).setPosition(playerCharacter.getX() + 15, playerCharacter.getY() - 16); // confirm button 3
+            levelUpMenuStage.getActors().get(0).setPosition(playerCharacter.getTrueX() - 15, playerCharacter.getTrueY() - 16); // confirm button 1
+            levelUpMenuStage.getActors().get(1).setPosition(playerCharacter.getTrueX() - 0, playerCharacter.getTrueY() - 16); // confirm button 2
+            levelUpMenuStage.getActors().get(2).setPosition(playerCharacter.getTrueX() + 15, playerCharacter.getTrueY() - 16); // confirm button 3
             levelUpMenuStage.getViewport().apply();
             levelUpMenuStage.act(elapsedTime);
             levelUpMenuStage.draw();
         }
         if (this.isDrawUpgradesMenu) {
             // draw the upgrades menu
-            upgradesMenuStage.getActors().get(0).setPosition(playerCharacter.getX() - 12, playerCharacter.getY() - 20); // back button
-            upgradesMenuStage.getActors().get(1).setPosition(playerCharacter.getX() + 18, playerCharacter.getY() - 20); // reset button
+            upgradesMenuStage.getActors().get(0).setPosition(playerCharacter.getTrueX() - 12, playerCharacter.getTrueY() - 20); // back button
+            upgradesMenuStage.getActors().get(1).setPosition(playerCharacter.getTrueX() + 18, playerCharacter.getTrueY() - 20); // reset button
             upgradesMenuStage.getViewport().apply();
             upgradesMenuStage.act(elapsedTime);
             upgradesMenuStage.draw();
         }
         if (this.isDrawResultsMenu) {
             // draw the results menu
-            resultsMenuStage.getActors().get(0).setPosition(playerCharacter.getX() + 15, playerCharacter.getY() - 20); // main menu button
+            resultsMenuStage.getActors().get(0).setPosition(playerCharacter.getTrueX() + 15, playerCharacter.getTrueY() - 20); // main menu button
             resultsMenuStage.getViewport().apply();
             resultsMenuStage.act(elapsedTime);
             resultsMenuStage.draw();
         }
         if (this.isDrawSettingsMenu) {
             // draw the settings menu
-            settingsMenuStage.getActors().get(0).setPosition(playerCharacter.getX() - 12, playerCharacter.getY() - 20); // back button
-            settingsMenuStage.getActors().get(1).setPosition(playerCharacter.getX() + 12, playerCharacter.getY() - 20); // confirm button
+            settingsMenuStage.getActors().get(0).setPosition(playerCharacter.getTrueX() - 12, playerCharacter.getTrueY() - 20); // back button
+            settingsMenuStage.getActors().get(1).setPosition(playerCharacter.getTrueX() + 12, playerCharacter.getTrueY() - 20); // confirm button
             settingsMenuStage.getViewport().apply();
             settingsMenuStage.act(elapsedTime);
             settingsMenuStage.draw();
@@ -557,6 +573,44 @@ public class MyGame extends ApplicationAdapter {
                 if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
                     setMenuState(MenuState.PAUSED);
                 }
+                // Check for E key -- face right
+                if (Gdx.input.isKeyPressed(Input.Keys.E)) {
+                    playerCharacter.faceRight();
+                }
+                // Check for Q key -- face left
+                else if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
+                    playerCharacter.faceLeft();
+                }
+
+                // TODO: REMOVE because this is just for testing attacks
+                timeTracker += STEP_TIME;
+                if (timeTracker > tempReuseTime) {
+                    timeTracker -= tempReuseTime;
+                    tempAttacks.add(new Attack(Attack.AttackTypeName.FIREBALL_EFFECT, playerCharacter.getTrueX(), playerCharacter.getAttackingY(),
+                            0, playerCharacter.getIsFacingLeft(), world, physicsShapeCache));
+                    int totalProj = ALL_ATTACK_DATA.get(Attack.AttackTypeName.FIREBALL_SKILL.ordinal()).getProjectileCount() + additionalProjectiles;
+                    for (int i = 0; i < totalProj; i++) {
+
+                        float angle = playerCharacter.getIsFacingLeft() * 90 + (float) 180 / (totalProj + 1) * (i + 1);
+                        float angle2 = -playerCharacter.getIsFacingLeft() * 90 + (float) 180 / (totalProj + 1) * (i + 1);
+                        float xComponent = (float) Math.cos(angle * MathUtils.degreesToRadians);
+                        float xComponent2 = (float) Math.cos(angle2 * MathUtils.degreesToRadians);
+                        float yComponent = (float) Math.sin(angle * MathUtils.degreesToRadians);
+                        float yComponent2 = (float) Math.sin(angle2 * MathUtils.degreesToRadians);
+
+                        Attack tempAttack = new Attack(Attack.AttackTypeName.FIREBALL_SKILL, playerCharacter.getTrueX(), playerCharacter.getAttackingY(),
+                                angle, playerCharacter.getIsFacingLeft(), world, physicsShapeCache);
+                        tempAttack.move(xComponent, yComponent, ALL_ATTACK_DATA.get(Attack.AttackTypeName.FIREBALL_SKILL.ordinal()).getProjectileSpeed());
+                        tempAttacks.add(tempAttack);
+
+                        Attack tempAttack2 = new Attack(Attack.AttackTypeName.FIREBALL_SKILL, playerCharacter.getTrueX(), playerCharacter.getAttackingY(),
+                                angle2, playerCharacter.getIsFacingLeft(), world, physicsShapeCache);
+                        tempAttack2.move(xComponent2, yComponent2, ALL_ATTACK_DATA.get(Attack.AttackTypeName.FIREBALL_SKILL.ordinal()).getProjectileSpeed());
+                        tempAttacks.add(tempAttack2);
+
+                    }
+                }
+                // Remove above later
                 world.step(STEP_TIME, VELOCITY_ITERATIONS, POSITION_ITERATIONS);
             }
             return STEP_TIME;
@@ -600,8 +654,8 @@ public class MyGame extends ApplicationAdapter {
         // Initialize the enemy's values:
         Character.CharacterTypeName newType = theWaveList.takeEnemy();
         int curWave = theWaveList.getCurWave();
-        float newX = playerCharacter.getX();
-        float newY = playerCharacter.getY();
+        float newX = playerCharacter.getTrueX();
+        float newY = playerCharacter.getTrueY();
         float deltaX = rand.nextFloat(enemySpawnSize * windowWidth) + windowWidth / 2;
         float deltaY = rand.nextFloat(enemySpawnSize * windowHeight) + windowHeight / 2;
 

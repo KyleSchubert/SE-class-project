@@ -16,7 +16,7 @@
 			<filter_mask_bits>65535</filter_mask_bits>
 			<filter_group_index>0</filter_group_index>
 			<is_sensor/>
-			<polygon>-17.0000, 33.0000, -17.0000, 2.0000, 17.0000, 2.0000, 17.0000, 33.0000</polygon>
+			<polygon>80.0000, 55.0000, 80.0000, 24.0000, 115.0000, 24.0000, 115.0000, 55.0000</polygon>
 		</fixture>
 	</body>
 
@@ -34,7 +34,7 @@
 			<filter_mask_bits>65535</filter_mask_bits>
 			<filter_group_index>0</filter_group_index>
 			<is_sensor/>
-			<polygon>-25.0000, 1.0000, 29.0000, 1.0000, 36.0000, 42.0000, 9.0000, 61.0000, -7.0000, 61.0000, -31.0000, 43.0000</polygon>
+			<polygon>98.0000, 68.0000, 155.0000, 68.0000, 162.0000, 109.0000, 135.0000, 128.0000, 116.0000, 128.0000, 92.0000, 110.0000</polygon>
 		</fixture>
 	</body>
 
@@ -52,7 +52,7 @@
 			<filter_mask_bits>65535</filter_mask_bits>
 			<filter_group_index>0</filter_group_index>
 			<is_sensor/>
-			<polygon>-29.0000, 61.0000, -29.0000, 0.0000, 30.0000, 0.0000, 30.0000, 61.0000</polygon>
+			<polygon>217.0000, 158.0000, 217.0000, 97.0000, 276.0000, 97.0000, 276.0000, 158.0000</polygon>
 		</fixture>
 	</body>
 
@@ -70,7 +70,7 @@
 			<filter_mask_bits>65535</filter_mask_bits>
 			<filter_group_index>0</filter_group_index>
 			<is_sensor/>
-			<polygon>-23.0000, 3.0000, 29.0000, 3.0000, 39.0000, 42.0000, 13.0000, 62.0000, -7.0000, 62.0000, -32.0000, 42.0000</polygon>
+			<polygon>19.0000, 33.0000, 71.0000, 33.0000, 81.0000, 72.0000, 55.0000, 92.0000, 35.0000, 92.0000, 10.0000, 72.0000</polygon>
 		</fixture>
 	</body>
 
@@ -88,7 +88,7 @@
 			<filter_mask_bits>65535</filter_mask_bits>
 			<filter_group_index>0</filter_group_index>
 			<is_sensor/>
-			<polygon>-31.0000, 46.0000, -31.0000, 2.0000, 35.0000, 2.0000, 35.0000, 46.0000</polygon>
+			<polygon>11.0000, 77.0000, 11.0000, 33.0000, 77.0000, 33.0000, 77.0000, 77.0000</polygon>
 		</fixture>
 	</body>
 
@@ -106,7 +106,7 @@
 			<filter_mask_bits>65535</filter_mask_bits>
 			<filter_group_index>0</filter_group_index>
 			<is_sensor/>
-			<polygon>24.0000, 2.0000, 24.0000, 45.0000, 2.0000, 53.0000, -21.0000, 44.0000, -21.0000, 2.0000</polygon>
+			<polygon>149.0000, 32.0000, 149.0000, 75.0000, 127.0000, 83.0000, 104.0000, 74.0000, 104.0000, 32.0000</polygon>
 		</fixture>
 	</body>
 
@@ -124,7 +124,7 @@
 			<filter_mask_bits>65535</filter_mask_bits>
 			<filter_group_index>0</filter_group_index>
 			<is_sensor/>
-			<polygon>-17.0000, 32.0000, -17.0000, 0.0000, 18.0000, 0.0000, 18.0000, 32.0000</polygon>
+			<polygon>31.0000, 47.0000, 31.0000, 15.0000, 66.0000, 15.0000, 66.0000, 47.0000</polygon>
 		</fixture>
 	</body>
 
@@ -142,7 +142,7 @@
 			<filter_mask_bits>65535</filter_mask_bits>
 			<filter_group_index>0</filter_group_index>
 			<is_sensor/>
-			<polygon>-34.0000, 64.0000, -34.0000, 1.0000, 41.0000, 1.0000, 41.0000, 64.0000</polygon>
+			<polygon>217.0000, 149.0000, 217.0000, 86.0000, 292.0000, 86.0000, 292.0000, 149.0000</polygon>
 		</fixture>
 	</body>
 
@@ -160,7 +160,7 @@
 			<filter_mask_bits>65535</filter_mask_bits>
 			<filter_group_index>0</filter_group_index>
 			<is_sensor/>
-			<polygon>-27.0000, 60.0000, -27.0000, 1.0000, 31.0000, 1.0000, 31.0000, 60.0000</polygon>
+			<polygon>34.0000, 96.0000, 34.0000, 37.0000, 92.0000, 37.0000, 92.0000, 96.0000</polygon>
 		</fixture>
 	</body>
 
@@ -178,7 +178,7 @@
 			<filter_mask_bits>65535</filter_mask_bits>
 			<filter_group_index>0</filter_group_index>
 			<is_sensor/>
-			<polygon>-27.0000, 2.0000, 28.0000, 2.0000, 34.0000, 42.0000, 9.0000, 61.0000, -7.0000, 61.0000, -32.0000, 43.0000</polygon>
+			<polygon>11.0000, 52.0000, 66.0000, 52.0000, 72.0000, 92.0000, 47.0000, 111.0000, 31.0000, 111.0000, 6.0000, 93.0000</polygon>
 		</fixture>
 	</body>
 
@@ -189,11 +189,11 @@
 		<allow_sleep/>
 	</body>
 
-	<body name="hitbox">
+	<body name="test">
 		<is_dynamic/>
 		<linear_damping>0</linear_damping>
 		<angular_damping>0</angular_damping>
-		<is_bullet/>
+		<allow_sleep/>
 		<fixture>
 			<density>2</density>
 			<friction>0</friction>
@@ -202,13 +202,29 @@
 			<filter_mask_bits>65535</filter_mask_bits>
 			<filter_group_index>0</filter_group_index>
 			<is_sensor/>
-			<polygon>10.0000, 52.0000, 10.0000, 12.0000, 50.0000, 12.0000, 50.0000, 52.0000</polygon>
+			<polygon>389.0000, 295.0000, 0.0000, 295.0000, -101.0000, 143.0000, 0.0000, 0.0000, 389.0000, 0.0000</polygon>
+		</fixture>
+	</body>
+
+	<body name="fireball">
+		<is_dynamic/>
+		<linear_damping>0</linear_damping>
+		<angular_damping>0</angular_damping>
+		<fixture>
+			<density>2</density>
+			<friction>0</friction>
+			<restitution>0</restitution>
+			<filter_category_bits>1</filter_category_bits>
+			<filter_mask_bits>65535</filter_mask_bits>
+			<filter_group_index>0</filter_group_index>
+			<is_sensor/>
+			<polygon>66.0000, 63.0000, 7.0000, 43.0000, 7.0000, 19.0000, 66.0000, 0.0000</polygon>
 		</fixture>
 	</body>
 
 	<metadata>
 		<format>1</format>
-		<ptm_ratio>32</ptm_ratio>
+		<ptm_ratio>256</ptm_ratio>
 	</metadata>
 
 </bodydef>

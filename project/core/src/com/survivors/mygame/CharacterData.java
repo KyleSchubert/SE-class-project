@@ -142,7 +142,7 @@ public class CharacterData {
                 this.dyingAnimationFrameDelays = new ArrayList<>(Collections.nCopies(7, 0.120f));
                 this.movingAnimationFrameDelays = new ArrayList<>(Collections.nCopies(6, 0.100f));
                 this.standingAnimationFrameDelays = new ArrayList<>(Collections.nCopies(8, 0.180f));
-                this.attackingAnimationFrameDelays = new ArrayList<>(Arrays.asList(0.300f, 0.210f, 0.180f, 0.90f, 0.90f, 0.120f, 0.300f, 0.300f, 0.300f));
+                this.attackingAnimationFrameDelays = new ArrayList<>(Arrays.asList(0.300f, 0.210f, 0.180f, 0.090f, 0.090f, 0.120f, 0.300f, 0.300f, 0.300f));
                 this.ableToAttack = true;
                 this.originX = 247;
                 this.originY = 150;

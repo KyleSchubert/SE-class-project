@@ -1,6 +1,8 @@
 package com.survivors.mygame;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.codeandweb.physicseditor.PhysicsShapeCache;
 
@@ -42,6 +44,8 @@ public class Character extends Mobile {
      * @param y                 The y coordinate of the spawning position of the Character.
      */
     public Character(CharacterTypeName characterTypeName, float x, float y, World world, PhysicsShapeCache physicsShapeCache) {
+        x -= ALL_CHARACTER_DATA.get(dataIndex).getOriginX() * SCALE_FACTOR;
+        y -= (ALL_CHARACTER_DATA.get(dataIndex).getDimensionY() - ALL_CHARACTER_DATA.get(dataIndex).getOriginY()) * SCALE_FACTOR;
         this.dataIndex = characterTypeName.ordinal();
         if (!ALL_CHARACTER_DATA.get(dataIndex).getInternalName().equals("void")) {
             this.makeBody(ALL_CHARACTER_DATA.get(dataIndex).getInternalName(), x, y, 0, world, physicsShapeCache);
@@ -108,25 +112,50 @@ public class Character extends Mobile {
             return;
         }
         this.frameTime += elapsedTime;
-        if (this.frame == this.stateFrameEndIndex) {
-            if (this.frameTime > ALL_CHARACTER_DATA.get(dataIndex).getAllAnimationFrameDelays().get(this.stateFrameStartIndex)) {
+        if (this.frameTime > ALL_CHARACTER_DATA.get(dataIndex).getAllAnimationFrameDelays().get(this.frame)) {
+            this.frameTime -= ALL_CHARACTER_DATA.get(dataIndex).getAllAnimationFrameDelays().get(this.frame);
+            if (this.frame == this.stateFrameEndIndex) {
                 if (this.state == CharacterState.DYING) {
                     this.state = CharacterState.DEAD; // ONLY settable here
                     return;
                 }
                 this.frame = this.stateFrameStartIndex;
-                this.frameTime -= ALL_CHARACTER_DATA.get(dataIndex).getAllAnimationFrameDelays().get(this.stateFrameStartIndex);
-            }
-        } else {
-            if (this.frameTime > ALL_CHARACTER_DATA.get(dataIndex).getAllAnimationFrameDelays().get(this.frame + 1)) {
-                this.frameTime -= ALL_CHARACTER_DATA.get(dataIndex).getAllAnimationFrameDelays().get(++this.frame);
+            } else {
+                this.frame++;
             }
         }
 
+        // TODO: Either this needs to be redone to be similar to the Attack version of things, or this needs to be optimized to have the difference pre-calculated.
+        float realX = this.getX();
+        if (this.isFacingLeft == -1) { // if facing right
+            realX += ALL_CHARACTER_DATA.get(dataIndex).getDimensionX() * SCALE_FACTOR;
+
+            PolygonShape test = (PolygonShape) this.getBody().getFixtureList().get(0).getShape();
+            Vector2 vertexToReadFrom = new Vector2();
+            test.getVertex(0, vertexToReadFrom);
+            float rightest = vertexToReadFrom.x;
+            float leftest = vertexToReadFrom.x;
+            for (int i = 1; i < test.getVertexCount(); i++) {
+                test.getVertex(i, vertexToReadFrom);
+                if (vertexToReadFrom.x > rightest) {
+                    rightest = vertexToReadFrom.x;
+                }
+                if (vertexToReadFrom.x < leftest) {
+                    leftest = vertexToReadFrom.x;
+                }
+            }
+            float originFromRight = rightest - ALL_CHARACTER_DATA.get(dataIndex).getOriginX() * SCALE_FACTOR + SCALE_FACTOR;
+            float originFromLeft = ALL_CHARACTER_DATA.get(dataIndex).getOriginX() * SCALE_FACTOR - leftest + SCALE_FACTOR;
+
+            float difference = originFromRight - originFromLeft;
+
+            realX += difference;
+        }
         batch.draw(ALL_CHARACTER_DATA.get(dataIndex).getAllAnimationFrames()[this.frame],
-                this.getX() - ALL_CHARACTER_DATA.get(dataIndex).getOriginX() * isFacingLeft * SCALE_FACTOR,
-                this.getY() - (ALL_CHARACTER_DATA.get(dataIndex).getDimensionY() - ALL_CHARACTER_DATA.get(dataIndex).getOriginY()) * SCALE_FACTOR,
-                0, 0,
+                realX,
+                this.getY(),
+                0,
+                0,
                 ALL_CHARACTER_DATA.get(dataIndex).getDimensionX(), ALL_CHARACTER_DATA.get(dataIndex).getDimensionY(),
                 isFacingLeft * SCALE_FACTOR, 1 * SCALE_FACTOR, 0);
     }
@@ -137,6 +166,10 @@ public class Character extends Mobile {
 
     public void faceLeft() {
         this.isFacingLeft = 1;
+    }
+
+    public int getIsFacingLeft() {
+        return this.isFacingLeft;
     }
 
     public int getDataIndex() {
@@ -163,5 +196,35 @@ public class Character extends Mobile {
         if (this.currentHp <= 0) {
             this.setState(CharacterState.DYING);
         }
+    }
+
+    public float getTrueX() {
+        return this.getX() + ALL_CHARACTER_DATA.get(dataIndex).getOriginX() * SCALE_FACTOR;
+    }
+
+    public float getTrueY() {
+        return this.getY() + (ALL_CHARACTER_DATA.get(dataIndex).getDimensionY() - ALL_CHARACTER_DATA.get(dataIndex).getOriginY()) * SCALE_FACTOR;
+    }
+
+    public float getAttackingY() {
+        float bodyHeight;
+
+        PolygonShape test = (PolygonShape) this.getBody().getFixtureList().get(0).getShape();
+        Vector2 vertexToReadFrom = new Vector2();
+        test.getVertex(0, vertexToReadFrom);
+        float bottomest = vertexToReadFrom.y;
+        float toppest = vertexToReadFrom.y;
+        for (int i = 1; i < test.getVertexCount(); i++) {
+            test.getVertex(i, vertexToReadFrom);
+            if (vertexToReadFrom.y > toppest) {
+                toppest = vertexToReadFrom.y;
+            }
+            if (vertexToReadFrom.y < bottomest) {
+                bottomest = vertexToReadFrom.y;
+            }
+        }
+        bodyHeight = toppest - bottomest;
+
+        return this.getTrueY() + bodyHeight / 2;
     }
 }

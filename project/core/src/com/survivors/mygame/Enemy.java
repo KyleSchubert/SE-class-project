@@ -4,6 +4,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.codeandweb.physicseditor.PhysicsShapeCache;
 
 import static com.survivors.mygame.MyGame.ALL_CHARACTER_DATA;
+import static com.survivors.mygame.MyGame.SCALE_FACTOR;
 
 public class Enemy extends Character {
     // Relies on player position
@@ -35,6 +36,9 @@ public class Enemy extends Character {
      *       of a new instance */
     public void init(CharacterTypeName characterTypeName, float x, float y, int curWave, World world, PhysicsShapeCache physicsShapeCache) {
         this.setDataIndex(characterTypeName.ordinal());
+        // TODO: confirm whether or not enemies have their ORIGINS on the point they are supposed to be spawned at
+        x -= ALL_CHARACTER_DATA.get(this.getDataIndex()).getOriginX() * SCALE_FACTOR;
+        y -= (ALL_CHARACTER_DATA.get(this.getDataIndex()).getDimensionY() - ALL_CHARACTER_DATA.get(this.getDataIndex()).getOriginY()) * SCALE_FACTOR;
         this.setCurrentHp(ALL_CHARACTER_DATA.get(this.getDataIndex()).getMaxHp());
         this.makeBody(ALL_CHARACTER_DATA.get(this.getDataIndex()).getInternalName(), x, y, 0, world, physicsShapeCache);
         this.setState(CharacterState.STANDING);
