@@ -1,13 +1,19 @@
 package com.survivors.mygame;
 
+import com.badlogic.gdx.Files;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Array;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
+import com.badlogic.gdx.files.FileHandle;
+
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+
+import static com.badlogic.gdx.Gdx.files;
 
 /* Nick: This class represents all the enemies in a level, by storing a list of
          the enemy waves that spawn in said level. */
@@ -26,52 +32,70 @@ public class WaveList {
     static String enemyPairRegex = "([a-zA-Z]+) +([0-9]+)";
     static Pattern PairPattern = Pattern.compile(enemyPairRegex);
 
-    /*
-    // May add another constructor that builds a list of waves from a text file
-    public WaveList(Array<Wave> WL) {
-        waveList = WL;
-        curWave = 0;
-        isEmpty = false;
-    }
-
-     */
-
     // Builds a wave list from a text file
     public WaveList(String waveFilePath) throws FileNotFoundException {
 
+        curWave = 0;
+        isEmpty = false;
+
         // Attempt to open the text file:
-        File waveFile = new File(waveFilePath);
-        if (!waveFile.exists())
+        FileHandle gdxFile = files.getFileHandle(waveFilePath, Files.FileType.Classpath);
+        if (!gdxFile.exists()) {
             throw new FileNotFoundException("Attempted and failed to open this file: " + waveFilePath);
+        }
 
-        // Create a scanner to go through each line of the file
-        Scanner scanner = new Scanner(waveFile);
+        // fileLines[0] is the first line, fileLines[1] is the second line...
+        String allFileContents = gdxFile.readString();
+        String[] fileLines = allFileContents.split("\r\n");
 
-        // The first line of a WaveList file is the number of waves
-        // For some reason the first line is "SampleWaves.txt" ?
-        int nWaves = Integer.parseInt(scanner.nextLine());
-        // Create (nWaves) indices in waveList
+        // Keeps track of where we are in the file
+        int lineIndex = 0;
+
+        // skip empty or commented lines
+        while (!isValidLine(fileLines[lineIndex]))
+            lineIndex++;
+
+        // The first valid line of a WaveList file should always be the number of waves
+        int nWaves = Integer.parseInt(fileLines[lineIndex]);
+        lineIndex++;
+
+        // Initialize this instance's array of waves
         waveList = new Array<Wave>();
 
         // Iterate through each remaining wave in the file
         for (int i = 0; i < nWaves; i++) {
 
-            // skip the empty line
-            scanner.nextLine();
+            // skip empty or commented lines
+            while (!isValidLine(fileLines[lineIndex]))
+                lineIndex++;
 
-            // the first line is this wave's timeToStart attribute
-            float newTime = Float.parseFloat(scanner.nextLine());
+            // This line should have the time at which this wave starts in seconds
+            float newTime = Float.parseFloat(fileLines[lineIndex]);
+            lineIndex++;
 
-            // the next line is the number of (enemyType, enemyNum) pairs in this wave
-            int nPairs = Integer.parseInt(scanner.nextLine());
+            // skip empty or commented lines
+            while (!isValidLine(fileLines[lineIndex]))
+                lineIndex++;
+
+            // The next line should have the number of enemy types in this wave
+            int nPairs = Integer.parseInt(fileLines[lineIndex]);
+            lineIndex++;
+
+            // The arrays to hold this wave's data
             Array<Character.CharacterTypeName> newTypes = new Array<>();
             Array<Integer> newNums = new Array<>();
 
-            // the next nTypes lines give the respective (enemyType, number) pairs:
-            for (int j = 0; j < nPairs; j++) {
+            // The next (nTypes) valid lines give the respective (enemyType, enemyNumber) pairs:
+            while (nPairs > 0) {
 
-                // applies the regex to split the pair
-                Matcher M = PairPattern.matcher(scanner.nextLine());
+                // skip empty or commented lines
+                if (!isValidLine(fileLines[lineIndex])) {
+                    lineIndex++;
+                    continue;
+                }
+
+                // Extract the enemy type and number from this line using enemyPairRegex
+                Matcher M = PairPattern.matcher(fileLines[lineIndex]);
                 M.find();
 
                 String newType = M.group(1);
@@ -79,16 +103,16 @@ public class WaveList {
 
                 newTypes.add(Character.CharacterTypeName.valueOf(newType));
                 newNums.add(Integer.parseInt(newNum));
+
+                nPairs--;
+                lineIndex++;
             }
 
             // Initialize the next wave in waveList[]
             waveList.add(new Wave(newTime, newTypes, newNums));
         }
 
-        scanner.close();
-
-        curWave = 0;
-        isEmpty = false;
+        System.out.println("hehe");
     }
 
 
@@ -129,6 +153,25 @@ public class WaveList {
 
     public boolean isEmpty() {
         return isEmpty;
+    }
+
+    // returns true if s is not a comment or an empty line
+    public static boolean isValidLine(String s) {
+
+        if (s.isEmpty())
+            return false;
+
+        int i = 0;
+        while (i < s.length()) {
+            char curChar = s.charAt(i);
+            if (curChar == '*')
+                return false;
+            else if (curChar != ' ')
+                return true;
+            i++;
+        }
+
+        return false;
     }
 
 }
