@@ -46,7 +46,7 @@ public class WaveList {
 
         // fileLines[0] is the first line, fileLines[1] is the second line...
         String allFileContents = gdxFile.readString();
-        String[] fileLines = allFileContents.split("\n");
+        String[] fileLines = allFileContents.split("\\r?\\n");
 
         // Keeps track of where we are in the file
         int lineIndex = 0;
