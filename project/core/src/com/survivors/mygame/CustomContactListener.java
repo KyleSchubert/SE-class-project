@@ -85,7 +85,7 @@ public class CustomContactListener implements ContactListener {
      * @param lookingForEntityType The type of entity that you are looking for. A type like "enemy", "player", "attack"
      * @return Returns a pair in order where the first entity is the one with the type you're looking for and the other is not.
      */
-    private Pair<EntityData, EntityData> getEntityOfType(Fixture fixtureA, Fixture fixtureB, String lookingForEntityType) {
+    private Pair getEntityOfType(Fixture fixtureA, Fixture fixtureB, String lookingForEntityType) {
         EntityData entityData1 = (EntityData) fixtureA.getBody().getUserData();
         EntityData entityData2 = (EntityData) fixtureB.getBody().getUserData();
         if (entityData1.entityType().equals(lookingForEntityType)) {
