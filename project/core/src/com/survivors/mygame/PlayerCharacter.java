@@ -23,6 +23,7 @@ public class PlayerCharacter extends Character {
      */
     public PlayerCharacter(float x, float y, World world, PhysicsShapeCache physicsShapeCache) {
         super(CharacterTypeName.HELMET_PENGUIN, x, y, world, physicsShapeCache);
+        this.setId("player", this);
     }
 
     public void keyCheck() {

@@ -7,6 +7,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.codeandweb.physicseditor.PhysicsShapeCache;
 
 import static com.survivors.mygame.MyGame.SCALE_FACTOR;
+import static com.survivors.mygame.MyGame.getNextEntityId;
 
 public class Mobile {
     private Body body;
@@ -50,5 +51,18 @@ public class Mobile {
 
     public Body getBody() {
         return body;
+    }
+
+    /**
+     * @param entityType Example: "enemy", "player", "attack"
+     * @param entity     Pass the "this" keyword
+     */
+    public final void setId(String entityType, Object entity) {
+        EntityData entityData = new EntityData(entityType, entity);
+        this.body.setUserData(entityData);
+    }
+
+    public final EntityData getId() {
+        return (EntityData) this.body.getUserData();
     }
 }

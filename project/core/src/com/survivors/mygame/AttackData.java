@@ -29,6 +29,8 @@ public class AttackData {
     private int projectileSpeed;
     private int damage;
     private boolean hasAdditionalAttackOnHit = false;
+    private boolean isStationary = true;
+    private boolean canBeRotated = true;
     private Attack.AttackTypeName additionalAttackOnHit;
     private Attack.AttackDirections aimingPattern;
     // TODO: figure out sounds
@@ -54,6 +56,7 @@ public class AttackData {
                 this.animationFrameDelays = new ArrayList<>(Arrays.asList(0.090f, 0.090f, 0.090f, 0.090f, 0.090f));
                 makeAnimationFrames("fireball/hit.png");
                 this.lifetime = 0.450f;
+                this.canBeRotated = false;
                 break;
             case FIREBALL_SKILL:
                 this.dimensionX = 104;
@@ -72,6 +75,7 @@ public class AttackData {
                 this.projectileSpeed = 32;
                 this.damage = 1200;
                 this.hasAdditionalAttackOnHit = true;
+                this.isStationary = false;
                 this.additionalAttackOnHit = Attack.AttackTypeName.FIREBALL_HIT;
                 this.aimingPattern = Attack.AttackDirections.FACING;
                 break;

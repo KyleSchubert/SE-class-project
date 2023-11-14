@@ -44,6 +44,7 @@ public class Enemy extends Character {
         this.setState(CharacterState.STANDING);
         spawnedWave = curWave;
         fromOldWave = false;
+        this.setId("enemy", this);
     }
 
     public int getSpawnedWave() {
@@ -51,7 +52,7 @@ public class Enemy extends Character {
     }
 
     public void markOldWave() {
-        fromOldWave = true;
+        this.fromOldWave = true;
     }
 
     public boolean fromOldWave() {

@@ -134,12 +134,13 @@ public class MyGame extends ApplicationAdapter {
     private boolean isDrawSettingsMenu; // [12] is the corresponding action in setMenuState()
     // End of menu variables and stuff
     // For testing attacks below:
-    private float tempReuseTime = 3;
+    private float tempReuseTime = 0.4f;
     private float timeTracker = 0;
-    private int additionalProjectiles = 2;
-    private ArrayList<Attack> tempAttacks = new ArrayList<>();
+    private int additionalProjectiles = 12;
+    private ArrayList<Attack> allAttacks = new ArrayList<>();
     // End of stuff for testing attacks
-
+    // For identifying one entity (Attack, Character) from another:
+    private static int nextEntityId = 0;
     Music appropriateSong;
 
 
@@ -360,9 +361,12 @@ public class MyGame extends ApplicationAdapter {
             }
         }
 
+        // Load in this contact listener to replace the default one
+        world.setContactListener(new CustomContactListener());
+
         setMenuState(MenuState.MAIN_MENU);
 
-        appropriateSong = Gdx.audio.newMusic(Gdx.files.classpath("March of the Spoons.mp3"));
+        appropriateSong = Gdx.audio.newMusic(Gdx.files.classpath("RestNPeace.mp3"));
         appropriateSong.play();
         appropriateSong.setLooping(true);
         // appropriateSong.pause() to pause
@@ -395,9 +399,9 @@ public class MyGame extends ApplicationAdapter {
         }
 
         // Nick: animate each enemy in current list pulled from the pool
-        for (Enemy E : activeEnemies) {
+       /* for (Enemy E : activeEnemies) {
             E.animate(batch, elapsedTime);
-        }
+        }*/
 
         testEnemy.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
         testEnemy2.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
@@ -411,7 +415,7 @@ public class MyGame extends ApplicationAdapter {
         }
         playerCharacter.animate(batch, elapsedTime);
 
-        for (Attack attack : tempAttacks) {
+        for (Attack attack : allAttacks) {
             attack.animate(batch, elapsedTime);
         }
 
@@ -503,6 +507,19 @@ public class MyGame extends ApplicationAdapter {
             if (enemies.get(i).getState() == DEAD) { // TODO: make things of state DYING not able to be collided with
                 world.destroyBody(enemies.get(i).getBody());
                 enemies.remove(i);
+            }
+        }
+
+        for (int i = allAttacks.size() - 1; i >= 0; i--) {
+            if (allAttacks.get(i).getAdditionalAttackOnHitMustHappen()) {
+                Attack tempAttack = new Attack(allAttacks.get(i).getAdditionalAttackOnHit(),
+                        allAttacks.get(i).getHitEnemyWhoIsAtX(), allAttacks.get(i).getHitEnemyWhoIsAtY(),
+                        0, playerCharacter.getIsFacingLeft(), world, physicsShapeCache);
+                allAttacks.add(tempAttack);
+            }
+            if (allAttacks.get(i).isToBeDestroyed()) {
+                world.destroyBody(allAttacks.get(i).getBody());
+                allAttacks.remove(i);
             }
         }
     }
@@ -603,7 +620,7 @@ public class MyGame extends ApplicationAdapter {
                 timeTracker += STEP_TIME;
                 if (timeTracker > tempReuseTime) {
                     timeTracker -= tempReuseTime;
-                    tempAttacks.add(new Attack(Attack.AttackTypeName.FIREBALL_EFFECT, playerCharacter.getTrueX(), playerCharacter.getAttackingY(),
+                    allAttacks.add(new Attack(Attack.AttackTypeName.FIREBALL_EFFECT, playerCharacter.getTrueX(), playerCharacter.getAttackingY(),
                             0, playerCharacter.getIsFacingLeft(), world, physicsShapeCache));
                     int totalProj = ALL_ATTACK_DATA.get(Attack.AttackTypeName.FIREBALL_SKILL.ordinal()).getProjectileCount() + additionalProjectiles;
                     for (int i = 0; i < totalProj; i++) {
@@ -618,12 +635,12 @@ public class MyGame extends ApplicationAdapter {
                         Attack tempAttack = new Attack(Attack.AttackTypeName.FIREBALL_SKILL, playerCharacter.getTrueX(), playerCharacter.getAttackingY(),
                                 angle, playerCharacter.getIsFacingLeft(), world, physicsShapeCache);
                         tempAttack.move(xComponent, yComponent, ALL_ATTACK_DATA.get(Attack.AttackTypeName.FIREBALL_SKILL.ordinal()).getProjectileSpeed());
-                        tempAttacks.add(tempAttack);
+                        allAttacks.add(tempAttack);
 
                         Attack tempAttack2 = new Attack(Attack.AttackTypeName.FIREBALL_SKILL, playerCharacter.getTrueX(), playerCharacter.getAttackingY(),
                                 angle2, playerCharacter.getIsFacingLeft(), world, physicsShapeCache);
                         tempAttack2.move(xComponent2, yComponent2, ALL_ATTACK_DATA.get(Attack.AttackTypeName.FIREBALL_SKILL.ordinal()).getProjectileSpeed());
-                        tempAttacks.add(tempAttack2);
+                        allAttacks.add(tempAttack2);
 
                     }
                 }
@@ -650,7 +667,7 @@ public class MyGame extends ApplicationAdapter {
         for (int i = activeEnemies.size - 1; i >= 0; i--) {
             if (activeEnemies.get(i).getState() == DEAD || isOutOfCamera(activeEnemies.get(i), playerCharacter) && activeEnemies.get(i).fromOldWave()) {
                 enemyPool.free(activeEnemies.get(i));
-                world.destroyBody(activeEnemies.get(i).getBody());
+                //world.destroyBody(activeEnemies.get(i).getBody());
                 activeEnemies.removeIndex(i);
             }
         }
@@ -848,5 +865,13 @@ public class MyGame extends ApplicationAdapter {
 
         return button;
     }
-}
 
+    public static int getNextEntityId() {
+        if (nextEntityId > 9999999) {
+            nextEntityId = 0;
+        } else {
+            nextEntityId++;
+        }
+        return nextEntityId;
+    }
+}

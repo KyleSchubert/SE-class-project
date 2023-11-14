@@ -1,6 +1,7 @@
 package com.survivors.mygame;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.physics.box2d.World;
 import com.codeandweb.physicseditor.PhysicsShapeCache;
 
@@ -22,15 +23,23 @@ public class Attack extends Mobile {
     }
 
     private int dataIndex;
+    private int damage;
     private int pierceTotal = 0;
+    private int pierceLimit;
     private float frameTime = 0;
     private float totalTime = 0;
     private int frame;
     private int isFacingLeft;
     private float rotation;
+    private boolean toBeDestroyed = false;
+    private boolean additionalAttackOnHitMustHappen = false;
+    private float hitEnemyWhoIsAtX;
+    private float hitEnemyWhoIsAtY;
 
     public Attack(AttackTypeName attackTypeName, float x, float y, float angle, int isFacingLeft, World world, PhysicsShapeCache physicsShapeCache) {
         this.dataIndex = attackTypeName.ordinal();
+        this.damage = ALL_ATTACK_DATA.get(dataIndex).getDamage();
+        this.pierceLimit = ALL_ATTACK_DATA.get(dataIndex).getPierceCount();
         if (ALL_ATTACK_DATA.get(dataIndex).hasCollisionBody()) {
             this.makeBody(ALL_ATTACK_DATA.get(dataIndex).getInternalCollisionBodyName(), x, y,
                     ALL_ATTACK_DATA.get(dataIndex).getOriginX() * SCALE_FACTOR,
@@ -46,13 +55,14 @@ public class Attack extends Mobile {
         this.frame = ALL_ATTACK_DATA.get(dataIndex).getAnimationStartFrameIndex();
         this.isFacingLeft = isFacingLeft;
         this.rotation = angle;
+        this.setId("attack", this);
     }
 
     public void animate(SpriteBatch batch, float elapsedTime) {
         this.frameTime += elapsedTime;
         this.totalTime += elapsedTime;
-        if (this.totalTime > ALL_ATTACK_DATA.get(dataIndex).getLifetime() || this.pierceTotal > ALL_ATTACK_DATA.get(dataIndex).getPierceCount()) {
-            // TODO: must destroy thing. Should pierce stuff be in here? probably not
+        if (this.totalTime > ALL_ATTACK_DATA.get(dataIndex).getLifetime()) {
+            this.toBeDestroyed = true;
             return;
         }
         if (this.frameTime > ALL_ATTACK_DATA.get(dataIndex).getAnimationFrameDelays().get(this.frame)) {
@@ -86,5 +96,51 @@ public class Attack extends Mobile {
 
     public void faceLeft() {
         this.isFacingLeft = 1;
+    }
+
+    /**
+     * Returns the damage amount and deals with pierces.
+     *
+     * @return returns this.damage, which is the damage value stored in the Attack when it was created.
+     */
+    public int dealDamage() {
+        this.pierceTotal++;
+        if (this.pierceTotal >= this.pierceLimit) {
+            this.toBeDestroyed = true;
+        }
+        // Schedule the additional attack on hit to happen
+        if (ALL_ATTACK_DATA.get(dataIndex).isHasAdditionalAttackOnHit()) {
+            this.additionalAttackOnHitMustHappen = true;
+        }
+
+        return this.damage;
+    }
+
+    public boolean isToBeDestroyed() {
+        return toBeDestroyed;
+    }
+
+    public boolean getAdditionalAttackOnHitMustHappen() {
+        return additionalAttackOnHitMustHappen;
+    }
+
+    public AttackTypeName getAdditionalAttackOnHit() {
+        return ALL_ATTACK_DATA.get(dataIndex).getAdditionalAttackOnHit();
+    }
+
+    public float getHitEnemyWhoIsAtX() {
+        return hitEnemyWhoIsAtX;
+    }
+
+    public void setHitEnemyWhoIsAtX(float hitEnemyWhoIsAtX) {
+        this.hitEnemyWhoIsAtX = hitEnemyWhoIsAtX;
+    }
+
+    public float getHitEnemyWhoIsAtY() {
+        return hitEnemyWhoIsAtY;
+    }
+
+    public void setHitEnemyWhoIsAtY(float hitEnemyWhoIsAtY) {
+        this.hitEnemyWhoIsAtY = hitEnemyWhoIsAtY;
     }
 }
