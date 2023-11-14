@@ -3,6 +3,7 @@ package com.survivors.mygame;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -138,6 +139,9 @@ public class MyGame extends ApplicationAdapter {
     private int additionalProjectiles = 2;
     private ArrayList<Attack> tempAttacks = new ArrayList<>();
     // End of stuff for testing attacks
+
+    Music appropriateSong;
+
 
     @Override
     public void create() {
@@ -357,6 +361,13 @@ public class MyGame extends ApplicationAdapter {
         }
 
         setMenuState(MenuState.MAIN_MENU);
+
+        appropriateSong = Gdx.audio.newMusic(Gdx.files.classpath("March of the Spoons.mp3"));
+        appropriateSong.play();
+        appropriateSong.setLooping(true);
+        // appropriateSong.pause() to pause
+        // appropriateSong.resume() to resume
+        // appropriateSong.stop() to stop playback entirely
     }
 
     @Override
@@ -517,6 +528,7 @@ public class MyGame extends ApplicationAdapter {
         upgradesMenuStage.dispose();
         settingsMenuStage.dispose();
         font.dispose();
+        appropriateSong.dispose();
     }
 
     // START SUGGESTED CODE FROM -> https://www.codeandweb.com/physicseditor/tutorials/libgdx-physics
