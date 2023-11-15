@@ -1,10 +1,14 @@
 package com.survivors.mygame;
 
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.Array;
 import com.codeandweb.physicseditor.PhysicsShapeCache;
+import com.badlogic.gdx.utils.Pool;
 
 import static com.survivors.mygame.MyGame.ALL_CHARACTER_DATA;
 import static com.survivors.mygame.MyGame.SCALE_FACTOR;
+
+import java.util.ArrayList;
 
 public class Enemy extends Character {
     // Relies on player position
@@ -19,6 +23,11 @@ public class Enemy extends Character {
      *       of enemies, and thus needs to be phased out next time it goes off-screen
      */
     private boolean fromOldWave;
+    
+    // Represents all the item types this enemy drops
+    private ArrayList<DroppedItem.DroppedItemTypeName> DroppedItemTypes;
+    // Represents the respective number of each item type this enemy drops
+    private ArrayList<Integer> DroppedItemAmounts;
 
     /* Nick: constructor now always passes VOID typename when creating
      *       a new enemy, as it will default to this state in the pool
@@ -61,5 +70,16 @@ public class Enemy extends Character {
 
     // Nick: Automatically called by Pool.free() whenever an enemy instance is freed
     public void reset() {
+
     }
+
+    // returns the ID's of this enemy's dropped items
+    public ArrayList<DroppedItem.DroppedItemTypeName> getDroppedItemTypes() {
+        return DroppedItemTypes;
+    }
+
+    public ArrayList<Integer> getDroppedItemAmounts() {
+        return DroppedItemAmounts;
+    }
+
 }

@@ -113,7 +113,19 @@ public class MyGame extends ApplicationAdapter {
     };
     // Nick: Wave data can probably be gotten from a file to pass to WaveList constructor
     private WaveList theWaveList;
-    // Currently used to spawn enemies in a random location just outside of player's view
+
+
+    // Array of all active dropped items
+    private final Array<DroppedItem> activeDroppedItems = new Array<>();
+
+    // Pool of enemy-droppable items
+    private final Pool<DroppedItem> droppedItemPool = new Pool<DroppedItem>() {
+        @Override
+        protected DroppedItem newObject() {
+            return new DroppedItem();
+        }
+    };
+
     Random rand = new Random();
     PlayerCharacter playerCharacter;
     ArrayList<Enemy> enemies; // For the grid of each enemy. For testing
@@ -398,10 +410,15 @@ public class MyGame extends ApplicationAdapter {
             elapsedTime = 0.0f;
         }
 
-        // Nick: animate each enemy in current list pulled from the pool
-       /* for (Enemy E : activeEnemies) {
+        // animate each enemy and droppeditem in the active arrays (currently not working)
+        /*
+        for (Enemy E : activeEnemies) {
             E.animate(batch, elapsedTime);
-        }*/
+        }
+        for (DroppedItem D : activeDroppedItems){
+            D.animate(batch, elapsedTime);
+        }
+        */
 
         testEnemy.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
         testEnemy2.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
@@ -661,11 +678,56 @@ public class MyGame extends ApplicationAdapter {
      *       removing by element from an array is unpredictable (removes the first element
      *       in the array equal to the thing we're removing).
      *
+     *       It now also spawns in dropped items only from enemies that were killed by
+     *       the player.
+     *
      *       In the future I may want to have each enemy tell a global array when said enemy
      *       dies, this way we don't need to loop through every enemy in-game every frame. */
     public void removeStaleEnemies() {
         for (int i = activeEnemies.size - 1; i >= 0; i--) {
-            if (activeEnemies.get(i).getState() == DEAD || isOutOfCamera(activeEnemies.get(i), playerCharacter) && activeEnemies.get(i).fromOldWave()) {
+
+            boolean enemyIsDead = activeEnemies.get(i).getState() == DEAD;
+            boolean enemyIsOffscreenAndOldWave = isOutOfCamera(activeEnemies.get(i), playerCharacter) && activeEnemies.get(i).fromOldWave();
+
+            // if this enemy needs to be despawned:
+            if (enemyIsDead || enemyIsOffscreenAndOldWave) {
+
+                // only if the enemy was killed by the player, spawn its dropped items:
+                if (enemyIsDead) {
+
+                    // get the list of this enemy's dropped items and numbers of each:
+                    ArrayList<DroppedItem.DroppedItemTypeName> DroppedItemTypes = activeEnemies.get(i).getDroppedItemTypes();
+                    ArrayList<Integer> DroppedItemAmounts = activeEnemies.get(i).getDroppedItemAmounts();
+
+                    /* Add to activeDroppedItems all of this enemy's items,
+                       taken from droppedItemPool */
+                    for (int j = 0; j < DroppedItemTypes.size(); j++) {
+                        for (int k = 0; k < DroppedItemAmounts.get(j); k++) {
+
+                            // get a new item from the pool
+                            DroppedItem newItem = droppedItemPool.obtain();
+
+                            // new x and y coords are random distances from enemy's location:
+                            float newX = activeEnemies.get(i).getX();
+                            float newY = activeEnemies.get(i).getY();
+                            if (rand.nextInt(2) == 0)
+                                newX += rand.nextFloat();
+                            else
+                                newY -= rand.nextFloat();
+                            if (rand.nextInt(2) == 0)
+                                newY += rand.nextFloat();
+                            else
+                                newY -= rand.nextFloat();
+
+                            // initialize the item's new attributes:
+                            newItem.init(newX, newY, DroppedItemTypes.get(j), world, physicsShapeCache);
+                            // add the item to activeDroppedItems
+                            activeDroppedItems.add(newItem);
+                        }
+                    }
+
+                }
+
                 enemyPool.free(activeEnemies.get(i));
                 //world.destroyBody(activeEnemies.get(i).getBody());
                 activeEnemies.removeIndex(i);
@@ -693,14 +755,14 @@ public class MyGame extends ApplicationAdapter {
         float deltaX = rand.nextFloat(enemySpawnSize * windowWidth) + windowWidth / 2;
         float deltaY = rand.nextFloat(enemySpawnSize * windowHeight) + windowHeight / 2;
 
-        if (rand.nextInt() == 0)
+        if (rand.nextInt(2) == 0)
             // newX = (playerX) - (random value to the left of camera)
             newX -= deltaX;
         else
             // newX = (playerX) + (random value to the right of camera)
             newX += deltaX;
 
-        if (rand.nextInt() == 0)
+        if (rand.nextInt(2) == 0)
             // newY = (playerY) + (random value below the camera)
             newY -= deltaY;
         else

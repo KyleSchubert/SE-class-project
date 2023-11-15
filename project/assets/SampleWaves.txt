@@ -1,21 +1,11 @@
-* This is a comment, since it starts with a * symbol.
-* Data and comments cannot be on the same line.
-* There can be any amount of blank lines, but actual data cannot have blank spaces to the left or right.
-
-* The first line of every WaveList file should be the integer number of waves:
 4
 
-* Each wave consists of:
-* The float value of when the wave starts in seconds:
 0.0
-* The integer number of (enemyType, enemyNumber) pairs:
 1
-* The respective pairs:
 BIRD 10
 
 10.5
 2
-* Note that there can be any amount of spaces between type and number:
 BIRD  20
 PLANT 5
 

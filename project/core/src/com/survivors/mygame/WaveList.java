@@ -1,15 +1,10 @@
 package com.survivors.mygame;
 
 import com.badlogic.gdx.Files;
-import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Scanner;
-
-import com.badlogic.gdx.files.FileHandle;
-
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
@@ -111,8 +106,6 @@ public class WaveList {
             // Initialize the next wave in waveList[]
             waveList.add(new Wave(newTime, newTypes, newNums));
         }
-
-        System.out.println("hehe");
     }
 
 
