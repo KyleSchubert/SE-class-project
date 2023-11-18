@@ -1,7 +1,6 @@
 package com.survivors.mygame;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.physics.box2d.World;
 import com.codeandweb.physicseditor.PhysicsShapeCache;
 
@@ -17,11 +16,11 @@ import static com.survivors.mygame.MyGame.SCALE_FACTOR;
  */
 public class Attack extends Mobile {
     public enum AttackTypeName {
-        FIREBALL_EFFECT, FIREBALL_HIT, FIREBALL_SKILL
+        FIREBALL_EFFECT, FIREBALL_HIT, FIREBALL_SKILL_NO_REPEAT_HIT_TESTING, FIREBALL_SKILL
     }
 
-    public enum AttackDirections {
-        FACING, LEFT_RIGHT, UP_DOWN, TOWARD_MOUSE, NONE, CLOSEST_ENEMY
+    public enum AimingDirections {
+        FACING, BEHIND, LEFT_RIGHT, UP_DOWN, TOWARD_MOUSE, NONE, CLOSEST_ENEMY
     }
 
     private int dataIndex;
@@ -51,10 +50,19 @@ public class Attack extends Mobile {
                     angle, isFacingLeft, // WAS angle + (180 * isFacingLeft)
                     world, physicsShapeCache);
         } else {
-            this.makeBody("void", x, y,
-                    ALL_ATTACK_DATA.get(dataIndex).getOriginX() * SCALE_FACTOR,
-                    (ALL_ATTACK_DATA.get(dataIndex).getDimensionY() - ALL_ATTACK_DATA.get(dataIndex).getOriginY()) * SCALE_FACTOR,
-                    0, isFacingLeft, world, physicsShapeCache);
+            if (ALL_ATTACK_DATA.get(dataIndex).isFlipNotRotate() && !ALL_ATTACK_DATA.get(dataIndex).isAttackingHorizontally()) {
+                // only the name changes because I'm using this to bring data into Mobile.java by allowing me to check if the name is not "void"
+                // but this still has no body part, just like "void".
+                this.makeBody("void2", x, y,
+                        ALL_ATTACK_DATA.get(dataIndex).getOriginX() * SCALE_FACTOR,
+                        (ALL_ATTACK_DATA.get(dataIndex).getDimensionY() - ALL_ATTACK_DATA.get(dataIndex).getOriginY()) * SCALE_FACTOR,
+                        angle, isFacingLeft, world, physicsShapeCache);
+            } else {
+                this.makeBody("void", x, y,
+                        ALL_ATTACK_DATA.get(dataIndex).getOriginX() * SCALE_FACTOR,
+                        (ALL_ATTACK_DATA.get(dataIndex).getDimensionY() - ALL_ATTACK_DATA.get(dataIndex).getOriginY()) * SCALE_FACTOR,
+                        0, isFacingLeft, world, physicsShapeCache);
+            }
         }
         this.frame = ALL_ATTACK_DATA.get(dataIndex).getAnimationStartFrameIndex();
         this.isFacingLeft = isFacingLeft;
@@ -84,7 +92,7 @@ public class Attack extends Mobile {
 
         float xOffset = ALL_ATTACK_DATA.get(dataIndex).getOriginX() * SCALE_FACTOR;
         float realRotation = this.rotation;
-        if (this.isFacingLeft == 1 && ALL_ATTACK_DATA.get(dataIndex).hasCollisionBody()) { // TODO: Why is this if statement actually needed? (I wrote this comment when I wrote this if statement)
+        if (this.isFacingLeft == 1 && !ALL_ATTACK_DATA.get(dataIndex).isFlipNotRotate()) { // TODO: Why is this if statement actually needed? (I wrote this comment when I wrote this if statement)
             realRotation = this.rotation + 180;
         }
         float yOffset = (ALL_ATTACK_DATA.get(dataIndex).getDimensionY() - ALL_ATTACK_DATA.get(dataIndex).getOriginY()) * SCALE_FACTOR;

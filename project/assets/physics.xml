@@ -222,6 +222,13 @@
 		</fixture>
 	</body>
 
+	<body name="void2">
+		<is_dynamic/>
+		<linear_damping>0</linear_damping>
+		<angular_damping>0</angular_damping>
+		<allow_sleep/>
+	</body>
+
 	<metadata>
 		<format>1</format>
 		<ptm_ratio>256</ptm_ratio>

@@ -24,15 +24,15 @@ public class AttackData {
     private int animationEndFrameIndex; // (default is set in makeAnimationFrames() and should be animationFrames.size()-1)
     private float lifetime; // (default should be the sum of animationFrameDelays)
     private int pierceCount = 999999999; // Attacks keeps traveling until lifetime exceeded OR pierce count exceeded
-    private boolean isProjectile = false;
+    private boolean isProjectile = false; // If it is a projectile, it will move.
     private int projectileCount;
     private int projectileSpeed;
     private int damage;
+    private boolean rotatableProjectile = false;
+    private boolean flipNotRotate = false; // Ex: FIREBALL_EFFECT uses this
     private boolean hasAdditionalAttackOnHit = false;
-    private boolean isStationary = true;
-    private boolean canBeRotated = true;
     private Attack.AttackTypeName additionalAttackOnHit;
-    private Attack.AttackDirections aimingPattern;
+    private Attack.AimingDirections aimingPattern;
     // TODO: figure out sounds
     // private someclass soundEffect;
 
@@ -46,7 +46,8 @@ public class AttackData {
                 this.animationFrameDelays = new ArrayList<>(Arrays.asList(0.030f, 0.090f, 0.090f, 0.090f, 0.090f));
                 makeAnimationFrames("fireball/char effect.png");
                 this.lifetime = 0.390f;
-                this.aimingPattern = Attack.AttackDirections.FACING;
+                this.aimingPattern = Attack.AimingDirections.FACING;
+                this.flipNotRotate = true;
                 break;
             case FIREBALL_HIT:
                 this.dimensionX = 160;
@@ -56,7 +57,7 @@ public class AttackData {
                 this.animationFrameDelays = new ArrayList<>(Arrays.asList(0.090f, 0.090f, 0.090f, 0.090f, 0.090f));
                 makeAnimationFrames("fireball/hit.png");
                 this.lifetime = 0.450f;
-                this.canBeRotated = false;
+                this.aimingPattern = Attack.AimingDirections.NONE;
                 break;
             case FIREBALL_SKILL:
                 this.dimensionX = 104;
@@ -68,16 +69,37 @@ public class AttackData {
                 this.isLooping = true;
                 this.hasCollisionBody = true;
                 this.internalCollisionBodyName = "fireball";
-                this.lifetime = 4;
+                this.lifetime = 3f;
                 this.pierceCount = 1;
                 this.isProjectile = true;
                 this.projectileCount = 3;
                 this.projectileSpeed = 32;
-                this.damage = 1200;
+                this.damage = 40;
+                this.rotatableProjectile = true;
                 this.hasAdditionalAttackOnHit = true;
-                this.isStationary = false;
                 this.additionalAttackOnHit = Attack.AttackTypeName.FIREBALL_HIT;
-                this.aimingPattern = Attack.AttackDirections.FACING;
+                this.aimingPattern = Attack.AimingDirections.LEFT_RIGHT;
+                break;
+            case FIREBALL_SKILL_NO_REPEAT_HIT_TESTING:
+                this.dimensionX = 104;
+                this.dimensionY = 63;
+                this.originX = 40;
+                this.originY = 32;
+                this.animationFrameDelays = new ArrayList<>(Arrays.asList(0.120f, 0.120f, 0.120f));
+                makeAnimationFrames("fireball/skill.png");
+                this.isLooping = true;
+                this.hasCollisionBody = true;
+                this.internalCollisionBodyName = "fireball";
+                this.lifetime = 0.4f;
+                this.pierceCount = 0;
+                this.isProjectile = true;
+                this.projectileCount = 1;
+                this.projectileSpeed = 16;
+                this.damage = 40;
+                this.rotatableProjectile = true;
+                this.hasAdditionalAttackOnHit = true;
+                this.additionalAttackOnHit = Attack.AttackTypeName.FIREBALL_HIT;
+                this.aimingPattern = Attack.AimingDirections.LEFT_RIGHT;
                 break;
             default:
                 System.out.println("Why was an ATTACK almost generated with no matching type name? attackTypeName:  " + attackTypeName);
@@ -173,7 +195,19 @@ public class AttackData {
         return additionalAttackOnHit;
     }
 
-    public Attack.AttackDirections getAimingPattern() {
+    public Attack.AimingDirections getAimingPattern() {
         return aimingPattern;
+    }
+
+    public boolean isRotatableProjectile() {
+        return rotatableProjectile;
+    }
+
+    public boolean isFlipNotRotate() {
+        return flipNotRotate;
+    }
+
+    public boolean isAttackingHorizontally() {
+        return this.aimingPattern == Attack.AimingDirections.FACING || this.aimingPattern == Attack.AimingDirections.BEHIND || this.aimingPattern == Attack.AimingDirections.LEFT_RIGHT;
     }
 }

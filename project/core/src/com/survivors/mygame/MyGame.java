@@ -105,7 +105,7 @@ public class MyGame extends ApplicationAdapter {
     /* Nick: GDX's Pool class for reusing class instances instead of
      *       constantly destroying and recreating them
      */
-    private final Pool<Enemy> enemyPool = new Pool<Enemy>() {
+    private final Pool<Enemy> enemyPool = new Pool<>() {
         @Override
         protected Enemy newObject() {
             return new Enemy();
@@ -119,7 +119,7 @@ public class MyGame extends ApplicationAdapter {
     private final Array<DroppedItem> activeDroppedItems = new Array<>();
 
     // Pool of enemy-droppable items
-    private final Pool<DroppedItem> droppedItemPool = new Pool<DroppedItem>() {
+    private final Pool<DroppedItem> droppedItemPool = new Pool<>() {
         @Override
         protected DroppedItem newObject() {
             return new DroppedItem();
@@ -148,8 +148,8 @@ public class MyGame extends ApplicationAdapter {
     // For testing attacks below:
     private float tempReuseTime = 0.4f;
     private float timeTracker = 0;
-    private int additionalProjectiles = 12;
-    private ArrayList<Attack> allAttacks = new ArrayList<>();
+    private int additionalProjectiles = 3;
+    private final ArrayList<Attack> allAttacks = new ArrayList<>();
     // End of stuff for testing attacks
     // For identifying one entity (Attack, Character) from another:
     private static Integer nextEntityId = 0;
@@ -529,12 +529,9 @@ public class MyGame extends ApplicationAdapter {
 
         for (int i = allAttacks.size() - 1; i >= 0; i--) {
             if (allAttacks.get(i).getAdditionalAttackOnHitMustHappen()) {
-                Attack tempAttack = new Attack(allAttacks.get(i).getAdditionalAttackOnHit(),
-                        allAttacks.get(i).getHitEnemyWhoIsAtX(), allAttacks.get(i).getHitEnemyWhoIsAtY(),
-                        0, playerCharacter.getIsFacingLeft(), world, physicsShapeCache);
-                tempAttack.recordHitEnemy(allAttacks.get(i).getLastHitEnemyId());
+                useAttack(allAttacks.get(i).getAdditionalAttackOnHit(), allAttacks.get(i).getHitEnemyWhoIsAtX(),
+                        allAttacks.get(i).getHitEnemyWhoIsAtY(), allAttacks.get(i).getLastHitEnemyId());
                 allAttacks.get(i).setAdditionalAttackOnHitMustHappen(false);
-                allAttacks.add(tempAttack);
             }
             if (allAttacks.get(i).isToBeDestroyed()) {
                 world.destroyBody(allAttacks.get(i).getBody());
@@ -639,29 +636,10 @@ public class MyGame extends ApplicationAdapter {
                 timeTracker += STEP_TIME;
                 if (timeTracker > tempReuseTime) {
                     timeTracker -= tempReuseTime;
-                    allAttacks.add(new Attack(Attack.AttackTypeName.FIREBALL_EFFECT, playerCharacter.getTrueX(), playerCharacter.getAttackingY(),
-                            0, playerCharacter.getIsFacingLeft(), world, physicsShapeCache));
-                    int totalProj = ALL_ATTACK_DATA.get(Attack.AttackTypeName.FIREBALL_SKILL.ordinal()).getProjectileCount() + additionalProjectiles;
-                    for (int i = 0; i < totalProj; i++) {
-
-                        float angle = playerCharacter.getIsFacingLeft() * 90 + (float) 180 / (totalProj + 1) * (i + 1);
-                        float angle2 = -playerCharacter.getIsFacingLeft() * 90 + (float) 180 / (totalProj + 1) * (i + 1);
-                        float xComponent = (float) Math.cos(angle * MathUtils.degreesToRadians);
-                        float xComponent2 = (float) Math.cos(angle2 * MathUtils.degreesToRadians);
-                        float yComponent = (float) Math.sin(angle * MathUtils.degreesToRadians);
-                        float yComponent2 = (float) Math.sin(angle2 * MathUtils.degreesToRadians);
-
-                        Attack tempAttack = new Attack(Attack.AttackTypeName.FIREBALL_SKILL, playerCharacter.getTrueX(), playerCharacter.getAttackingY(),
-                                angle, playerCharacter.getIsFacingLeft(), world, physicsShapeCache);
-                        tempAttack.move(xComponent, yComponent, ALL_ATTACK_DATA.get(Attack.AttackTypeName.FIREBALL_SKILL.ordinal()).getProjectileSpeed());
-                        allAttacks.add(tempAttack);
-
-                        Attack tempAttack2 = new Attack(Attack.AttackTypeName.FIREBALL_SKILL, playerCharacter.getTrueX(), playerCharacter.getAttackingY(),
-                                angle2, playerCharacter.getIsFacingLeft(), world, physicsShapeCache);
-                        tempAttack2.move(xComponent2, yComponent2, ALL_ATTACK_DATA.get(Attack.AttackTypeName.FIREBALL_SKILL.ordinal()).getProjectileSpeed());
-                        allAttacks.add(tempAttack2);
-
-                    }
+                    useAttack(Attack.AttackTypeName.FIREBALL_EFFECT, playerCharacter.getTrueX(),
+                            playerCharacter.getAttackingY(), -1);
+                    useAttack(Attack.AttackTypeName.FIREBALL_SKILL, playerCharacter.getTrueX(),
+                            playerCharacter.getAttackingY(), -1);
                 }
                 // Remove above later
                 world.step(STEP_TIME, VELOCITY_ITERATIONS, POSITION_ITERATIONS);
@@ -937,5 +915,191 @@ public class MyGame extends ApplicationAdapter {
             nextEntityId++;
         }
         return nextEntityId;
+    }
+
+    /**
+     * @param attackTypeName        The Attack.AttackTypeName of the AttackData that you want to make an Attack from
+     * @param spawnX                Examples: playerCharacter.getTrueX(), allAttacks.get(i).getHitEnemyWhoIsAtX()
+     * @param spawnY                Examples: playerCharacter.getAttackingY(), allAttacks.get(i).getHitEnemyWhoIsAtY()
+     * @param ignoreEnemyWithThisId Use -1 if there is no enemyId to ignore. This is for making attacks that spawn at enemies not waste a hit on them.
+     */
+    public void useAttack(Attack.AttackTypeName attackTypeName, float spawnX, float spawnY, Integer ignoreEnemyWithThisId) {
+        int index = attackTypeName.ordinal();
+        /*
+         * ----- 7 Situations -----
+         * 1. LEFT_RIGHT or UP_DOWN with isRotatableProjectile() == true (implies projectile):
+         *          projectiles come out radially and move outward. Also, the amount of projectiles is spawned on both sides
+         *          like 10 -> 10 on left and 10 on right.
+         * 2. LEFT_RIGHT or UP_DOWN with isRotatableProjectile() == false with isProjectile() == false:
+         *          attacks just happen to the left and right with no rotation or movement. Also, the attack is spawned on
+         *          both sides.
+         * 3. LEFT_RIGHT or UP_DOWN with isRotatableProjectile() == false with isProjectile() == true:
+         *          projectiles come out parallel to each other and move outward. Also, the amount of projectiles is spawned
+         *          on both sides like 10 -> 10 on left and 10 on right.
+         * 4. FACING or BEHIND with isRotatableProjectile() == true (implies projectile):
+         *          projectiles come out radially in one direction and move outward. No projectile doubling
+         * 5. FACING or BEHIND with isRotatableProjectile() == false with isProjectile() == false:
+         *          attack just happen to the correct direction with no rotation or movement. No attack doubling
+         * 6. FACING or BEHIND with isRotatableProjectile() == false with isProjectile() == true:
+         *          projectiles come out parallel to each other and move outward. No projectile doubling
+         * 7. NONE:
+         *          the attack happens once and does not move, is not rotated, and ignores the direction the player is facing
+         */
+
+        // CASE 7
+        if (ALL_ATTACK_DATA.get(index).getAimingPattern() == Attack.AimingDirections.NONE) {
+            Attack tempAttack = new Attack(attackTypeName, spawnX, spawnY,
+                    0, -1, world, physicsShapeCache);
+            if (ignoreEnemyWithThisId != -1) {
+                tempAttack.recordHitEnemy(ignoreEnemyWithThisId);
+            }
+            allAttacks.add(tempAttack);
+        } else if (ALL_ATTACK_DATA.get(index).isProjectile()) {
+            int totalProj = ALL_ATTACK_DATA.get(index).getProjectileCount() + this.additionalProjectiles;
+            // CASES 1, 3
+            if (ALL_ATTACK_DATA.get(index).getAimingPattern() == Attack.AimingDirections.LEFT_RIGHT || ALL_ATTACK_DATA.get(index).getAimingPattern() == Attack.AimingDirections.UP_DOWN) {
+                for (int i = 0; i < totalProj; i++) {
+                    float newSpawnY = spawnY;
+                    float newSpawnX = spawnX;
+
+                    float angle = 0;
+                    float xComponent = 1;
+                    float yComponent = 0;
+                    float angle2 = 180;
+                    float xComponent2 = -1;
+                    float yComponent2 = 0;
+                    if (ALL_ATTACK_DATA.get(index).getAimingPattern() == Attack.AimingDirections.UP_DOWN) {
+                        angle = 90;
+                        xComponent = 0;
+                        yComponent = 1;
+                        angle2 = -90;
+                        xComponent2 = 0;
+                        yComponent2 = -1;
+                    }
+
+                    if (ALL_ATTACK_DATA.get(index).isRotatableProjectile()) {
+                        angle += -90 - (float) 180 / (totalProj + 1) * (i + 1);
+                        xComponent = (float) Math.cos(angle * MathUtils.degreesToRadians);
+                        yComponent = (float) Math.sin(angle * MathUtils.degreesToRadians);
+
+                        angle2 += -90 - (float) 180 / (totalProj + 1) * (i + 1);
+                        xComponent2 = (float) Math.cos(angle2 * MathUtils.degreesToRadians);
+                        yComponent2 = (float) Math.sin(angle2 * MathUtils.degreesToRadians);
+                    } else {
+                        if (ALL_ATTACK_DATA.get(index).getAimingPattern() == Attack.AimingDirections.LEFT_RIGHT) {
+                            newSpawnY = spawnY - (totalProj - 1) * 24 * SCALE_FACTOR + 48 * SCALE_FACTOR * i;
+                            if (totalProj % 2 == 1) {
+                                newSpawnY -= 12 * SCALE_FACTOR;
+                            }
+                        } else if (ALL_ATTACK_DATA.get(index).getAimingPattern() == Attack.AimingDirections.UP_DOWN) {
+                            newSpawnX = spawnX - (totalProj - 1) * 24 * SCALE_FACTOR + 48 * SCALE_FACTOR * i;
+                            if (totalProj % 2 == 1) {
+                                newSpawnX -= 12 * SCALE_FACTOR;
+                            }
+                        }
+                    }
+
+                    Attack tempAttack = new Attack(attackTypeName, newSpawnX, newSpawnY,
+                            angle, playerCharacter.getIsFacingLeft(), world, physicsShapeCache);
+                    tempAttack.move(xComponent, yComponent, ALL_ATTACK_DATA.get(index).getProjectileSpeed());
+                    if (ignoreEnemyWithThisId != -1) {
+                        tempAttack.recordHitEnemy(ignoreEnemyWithThisId);
+                    }
+                    allAttacks.add(tempAttack);
+
+                    Attack tempAttack2 = new Attack(attackTypeName, newSpawnX, newSpawnY,
+                            angle2, playerCharacter.getIsFacingLeft(), world, physicsShapeCache);
+                    tempAttack2.move(xComponent2, yComponent2, ALL_ATTACK_DATA.get(index).getProjectileSpeed());
+                    if (ignoreEnemyWithThisId != -1) {
+                        tempAttack2.recordHitEnemy(ignoreEnemyWithThisId);
+                    }
+                    allAttacks.add(tempAttack2);
+                }
+            }
+            // CASES 4, 6
+            else if (ALL_ATTACK_DATA.get(index).getAimingPattern() == Attack.AimingDirections.FACING || ALL_ATTACK_DATA.get(index).getAimingPattern() == Attack.AimingDirections.BEHIND) {
+                for (int i = 0; i < totalProj; i++) {
+                    float newSpawnY = spawnY;
+
+                    float angle = 0;
+                    float xComponent = 1;
+                    float yComponent = 0;
+                    if (playerCharacter.getIsFacingLeft() == -1) { // FACING RIGHT
+                        angle = 180;
+                        xComponent = -1;
+                    }
+
+                    if (ALL_ATTACK_DATA.get(index).getAimingPattern() == Attack.AimingDirections.BEHIND && ALL_ATTACK_DATA.get(index).isRotatableProjectile()) {
+                        angle += 180;
+                    }
+
+                    if (ALL_ATTACK_DATA.get(index).isRotatableProjectile()) {
+                        angle += -90 - (float) 180 / (totalProj + 1) * (i + 1);
+                        xComponent = (float) Math.cos(angle * MathUtils.degreesToRadians);
+                        yComponent = (float) Math.sin(angle * MathUtils.degreesToRadians);
+
+                    } else {
+                        newSpawnY = spawnY - (totalProj - 1) * 24 * SCALE_FACTOR + 48 * SCALE_FACTOR * i;
+                        if (totalProj % 2 == 1) {
+                            newSpawnY -= 12 * SCALE_FACTOR;
+                        }
+                    }
+
+                    Attack tempAttack = new Attack(attackTypeName, spawnX, newSpawnY,
+                            angle, playerCharacter.getIsFacingLeft(), world, physicsShapeCache);
+                    tempAttack.move(xComponent, yComponent, ALL_ATTACK_DATA.get(index).getProjectileSpeed());
+                    if (ignoreEnemyWithThisId != -1) {
+                        tempAttack.recordHitEnemy(ignoreEnemyWithThisId);
+                    }
+                    allAttacks.add(tempAttack);
+                }
+            }
+        } else {
+            // CASE 2a (requires isFlipNotRotate() == true)
+            if (ALL_ATTACK_DATA.get(index).getAimingPattern() == Attack.AimingDirections.UP_DOWN && ALL_ATTACK_DATA.get(index).isFlipNotRotate()) {
+                Attack tempAttack = new Attack(attackTypeName, spawnX, spawnY,
+                        90, -1, world, physicsShapeCache);
+                if (ignoreEnemyWithThisId != -1) {
+                    tempAttack.recordHitEnemy(ignoreEnemyWithThisId);
+                }
+                allAttacks.add(tempAttack);
+                Attack tempAttack2 = new Attack(attackTypeName, spawnX, spawnY,
+                        -90, -1, world, physicsShapeCache);
+                if (ignoreEnemyWithThisId != -1) {
+                    tempAttack2.recordHitEnemy(ignoreEnemyWithThisId);
+                }
+                allAttacks.add(tempAttack2);
+            }
+            // CASE 2b (requires isFlipNotRotate() == true)
+            else if (ALL_ATTACK_DATA.get(index).getAimingPattern() == Attack.AimingDirections.LEFT_RIGHT) {
+                Attack tempAttack = new Attack(attackTypeName, spawnX, spawnY,
+                        0, playerCharacter.getIsFacingLeft(), world, physicsShapeCache);
+                if (ignoreEnemyWithThisId != -1) {
+                    tempAttack.recordHitEnemy(ignoreEnemyWithThisId);
+                }
+                allAttacks.add(tempAttack);
+                Attack tempAttack2 = new Attack(attackTypeName, spawnX, spawnY,
+                        0, -playerCharacter.getIsFacingLeft(), world, physicsShapeCache);
+                if (ignoreEnemyWithThisId != -1) {
+                    tempAttack2.recordHitEnemy(ignoreEnemyWithThisId);
+                }
+                allAttacks.add(tempAttack2);
+            }
+            // CASE 5
+            else if (ALL_ATTACK_DATA.get(index).getAimingPattern() == Attack.AimingDirections.FACING || ALL_ATTACK_DATA.get(index).getAimingPattern() == Attack.AimingDirections.BEHIND) {
+                int facingMultiplier = 1;
+                if (ALL_ATTACK_DATA.get(index).getAimingPattern() == Attack.AimingDirections.BEHIND) {
+                    facingMultiplier = -1;
+                }
+                Attack tempAttack = new Attack(attackTypeName, spawnX, spawnY,
+                        0, facingMultiplier * playerCharacter.getIsFacingLeft(), world, physicsShapeCache);
+                if (ignoreEnemyWithThisId != -1) {
+                    tempAttack.recordHitEnemy(ignoreEnemyWithThisId);
+                }
+                allAttacks.add(tempAttack);
+            }
+        }
+
+
     }
 }
