@@ -5,6 +5,8 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.physics.box2d.World;
 import com.codeandweb.physicseditor.PhysicsShapeCache;
 
+import java.util.HashSet;
+
 import static com.survivors.mygame.MyGame.ALL_ATTACK_DATA;
 import static com.survivors.mygame.MyGame.SCALE_FACTOR;
 
@@ -35,6 +37,8 @@ public class Attack extends Mobile {
     private boolean additionalAttackOnHitMustHappen = false;
     private float hitEnemyWhoIsAtX;
     private float hitEnemyWhoIsAtY;
+    private HashSet<Integer> alreadyHitTheseEnemies = new HashSet<>();
+    private Integer lastHitEnemyId;
 
     public Attack(AttackTypeName attackTypeName, float x, float y, float angle, int isFacingLeft, World world, PhysicsShapeCache physicsShapeCache) {
         this.dataIndex = attackTypeName.ordinal();
@@ -105,7 +109,7 @@ public class Attack extends Mobile {
      */
     public int dealDamage() {
         this.pierceTotal++;
-        if (this.pierceTotal >= this.pierceLimit) {
+        if (this.pierceTotal > this.pierceLimit) {
             this.toBeDestroyed = true;
         }
         // Schedule the additional attack on hit to happen
@@ -122,6 +126,10 @@ public class Attack extends Mobile {
 
     public boolean getAdditionalAttackOnHitMustHappen() {
         return additionalAttackOnHitMustHappen;
+    }
+
+    public void setAdditionalAttackOnHitMustHappen(boolean additionalAttackOnHitMustHappen) {
+        this.additionalAttackOnHitMustHappen = additionalAttackOnHitMustHappen;
     }
 
     public AttackTypeName getAdditionalAttackOnHit() {
@@ -142,5 +150,18 @@ public class Attack extends Mobile {
 
     public void setHitEnemyWhoIsAtY(float hitEnemyWhoIsAtY) {
         this.hitEnemyWhoIsAtY = hitEnemyWhoIsAtY;
+    }
+
+    public boolean hasAlreadyHitThisEnemy(Integer enemyIdToTest) {
+        return this.alreadyHitTheseEnemies.contains(enemyIdToTest);
+    }
+
+    public void recordHitEnemy(Integer newEnemyId) {
+        this.lastHitEnemyId = newEnemyId;
+        this.alreadyHitTheseEnemies.add(newEnemyId);
+    }
+
+    public Integer getLastHitEnemyId() {
+        return lastHitEnemyId;
     }
 }

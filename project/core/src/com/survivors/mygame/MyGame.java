@@ -152,7 +152,7 @@ public class MyGame extends ApplicationAdapter {
     private ArrayList<Attack> allAttacks = new ArrayList<>();
     // End of stuff for testing attacks
     // For identifying one entity (Attack, Character) from another:
-    private static int nextEntityId = 0;
+    private static Integer nextEntityId = 0;
     Music appropriateSong;
 
 
@@ -532,6 +532,8 @@ public class MyGame extends ApplicationAdapter {
                 Attack tempAttack = new Attack(allAttacks.get(i).getAdditionalAttackOnHit(),
                         allAttacks.get(i).getHitEnemyWhoIsAtX(), allAttacks.get(i).getHitEnemyWhoIsAtY(),
                         0, playerCharacter.getIsFacingLeft(), world, physicsShapeCache);
+                tempAttack.recordHitEnemy(allAttacks.get(i).getLastHitEnemyId());
+                allAttacks.get(i).setAdditionalAttackOnHitMustHappen(false);
                 allAttacks.add(tempAttack);
             }
             if (allAttacks.get(i).isToBeDestroyed()) {

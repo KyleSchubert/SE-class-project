@@ -5,10 +5,9 @@ import com.badlogic.gdx.utils.Array;
 import com.codeandweb.physicseditor.PhysicsShapeCache;
 import com.badlogic.gdx.utils.Pool;
 
-import static com.survivors.mygame.MyGame.ALL_CHARACTER_DATA;
-import static com.survivors.mygame.MyGame.SCALE_FACTOR;
-
 import java.util.ArrayList;
+
+import static com.survivors.mygame.MyGame.*;
 
 public class Enemy extends Character {
     // Relies on player position
@@ -23,11 +22,14 @@ public class Enemy extends Character {
      *       of enemies, and thus needs to be phased out next time it goes off-screen
      */
     private boolean fromOldWave;
-    
+
     // Represents all the item types this enemy drops
     private ArrayList<DroppedItem.DroppedItemTypeName> DroppedItemTypes;
     // Represents the respective number of each item type this enemy drops
     private ArrayList<Integer> DroppedItemAmounts;
+
+    // For tracking which enemy was collided with by an attack (pierce tracking)
+    private Integer enemyId;
 
     /* Nick: constructor now always passes VOID typename when creating
      *       a new enemy, as it will default to this state in the pool
@@ -54,6 +56,7 @@ public class Enemy extends Character {
         spawnedWave = curWave;
         fromOldWave = false;
         this.setId("enemy", this);
+        this.enemyId = getNextEntityId();
     }
 
     public int getSpawnedWave() {
@@ -82,4 +85,7 @@ public class Enemy extends Character {
         return DroppedItemAmounts;
     }
 
+    public Integer getEnemyId() {
+        return enemyId;
+    }
 }

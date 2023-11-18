@@ -19,6 +19,10 @@ public class CustomContactListener implements ContactListener {
                 return;
             }
             Attack attack = (Attack) pair.a().entity();
+            if (attack.hasAlreadyHitThisEnemy(enemy.getEnemyId())) {
+                return;
+            }
+            attack.recordHitEnemy(enemy.getEnemyId());
             attack.setHitEnemyWhoIsAtX(enemy.getTrueX());
             attack.setHitEnemyWhoIsAtY(enemy.getAttackingY());
             enemy.takeDamage(attack.dealDamage());
