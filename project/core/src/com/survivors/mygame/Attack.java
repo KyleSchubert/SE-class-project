@@ -72,6 +72,10 @@ public class Attack extends Mobile {
         if (this.frameTime > ALL_ATTACK_DATA.get(dataIndex).getAnimationFrameDelays().get(this.frame)) {
             this.frameTime -= ALL_ATTACK_DATA.get(dataIndex).getAnimationFrameDelays().get(this.frame);
             if (this.frame == ALL_ATTACK_DATA.get(dataIndex).getAnimationEndFrameIndex()) {
+                if (!ALL_ATTACK_DATA.get(dataIndex).isLooping()) {
+                    this.toBeDestroyed = true;
+                    return;
+                }
                 this.frame = ALL_ATTACK_DATA.get(dataIndex).getAnimationStartFrameIndex();
             } else {
                 this.frame++;
