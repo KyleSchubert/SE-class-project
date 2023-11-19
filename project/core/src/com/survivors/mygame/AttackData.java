@@ -33,6 +33,7 @@ public class AttackData {
     private boolean hasAdditionalAttackOnHit = false;
     private Attack.AttackTypeName additionalAttackOnHit;
     private Attack.AimingDirections aimingPattern;
+    private boolean trackAllOldHitEnemies = false;
     // TODO: figure out sounds
     // private someclass soundEffect;
 
@@ -153,6 +154,22 @@ public class AttackData {
                 this.aimingPattern = Attack.AimingDirections.FACING;
                 this.flipNotRotate = true;
                 break;
+            case PURPLE_EXPLOSION_HIT:
+                this.dimensionX = 246;
+                this.dimensionY = 274;
+                this.originX = this.dimensionX / 2;
+                this.originY = this.dimensionY / 2;
+                this.animationFrameDelays = new ArrayList<>(Arrays.asList(0.060f, 0.060f, 0.060f, 0.060f, 0.060f));
+                makeAnimationFrames("purple explosion/hit.png");
+                this.hasCollisionBody = true;
+                this.internalCollisionBodyName = "purple explosion";
+                this.lifetime = 0.300f;
+                this.damage = 140;
+                this.hasAdditionalAttackOnHit = true;
+                this.additionalAttackOnHit = Attack.AttackTypeName.PURPLE_EXPLOSION_HIT;
+                this.aimingPattern = Attack.AimingDirections.NONE;
+                this.trackAllOldHitEnemies = true;
+                break;
             default:
                 System.out.println("Why was an ATTACK almost generated with no matching type name? attackTypeName:  " + attackTypeName);
         }
@@ -261,5 +278,9 @@ public class AttackData {
 
     public boolean isAttackingHorizontally() {
         return this.aimingPattern == Attack.AimingDirections.FACING || this.aimingPattern == Attack.AimingDirections.BEHIND || this.aimingPattern == Attack.AimingDirections.LEFT_RIGHT;
+    }
+
+    public boolean isTrackAllOldHitEnemies() {
+        return trackAllOldHitEnemies;
     }
 }

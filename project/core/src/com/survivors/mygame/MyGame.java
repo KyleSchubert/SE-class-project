@@ -146,10 +146,10 @@ public class MyGame extends ApplicationAdapter {
     private boolean isDrawSettingsMenu; // [12] is the corresponding action in setMenuState()
     // End of menu variables and stuff
     // For testing attacks below:
-    private float tempReuseTime = 0.4f;
+    private final float tempReuseTime = 0.4f;
     private int numberForTestingSkills = 0;
     private float timeTracker = 0;
-    private int additionalProjectiles = 3;
+    private final int additionalProjectiles = 3;
     private final ArrayList<Attack> allAttacks = new ArrayList<>();
     // End of stuff for testing attacks
     // For identifying one entity (Attack, Character) from another:
@@ -411,7 +411,7 @@ public class MyGame extends ApplicationAdapter {
             elapsedTime = 0.0f;
         }
 
-        // animate each enemy and droppeditem in the active arrays (currently not working)
+        // animate each enemy and droppedItem in the active arrays (currently not working)
         /*
         for (Enemy E : activeEnemies) {
             E.animate(batch, elapsedTime);
@@ -534,7 +534,13 @@ public class MyGame extends ApplicationAdapter {
                     JustHitEnemyData data = allAttacks.get(i).getJustHitEnemyData().get(j);
                     useAttack(allAttacks.get(i).getAdditionalAttackOnHit(), data.enemyX(),
                             data.enemyY(), data.enemyId());
+                    if (ALL_ATTACK_DATA.get(allAttacks.get(i).getAdditionalAttackOnHit().ordinal()).isTrackAllOldHitEnemies()) {
+                        // edit the attack that was just made:
+                        allAttacks.get(allAttacks.size() - 1).copyIntoAlreadyHitTheseEnemies(allAttacks.get(i).getAlreadyHitTheseEnemies());
+                    }
+
                 }
+                allAttacks.get(i).clearJustHitEnemyData();
                 allAttacks.get(i).setAdditionalAttackOnHitMustHappen(false);
             }
             if (allAttacks.get(i).isToBeDestroyed()) {
@@ -649,12 +655,14 @@ public class MyGame extends ApplicationAdapter {
                     } else if (numberForTestingSkills == 1) {
                         useAttack(Attack.AttackTypeName.DRAGON_SLASH_SKILL, playerCharacter.getTrueX(),
                                 playerCharacter.getAttackingY(), -1);
-                        System.out.println("ATTACK STARTED ---------------------");
                         numberForTestingSkills++;
                     } else if (numberForTestingSkills == 2) {
                         useAttack(Attack.AttackTypeName.SHADOWY_SMACK_SKILL, playerCharacter.getTrueX(),
                                 playerCharacter.getAttackingY(), -1);
-                        System.out.println("ATTACK STARTED ---------------------");
+                        numberForTestingSkills++;
+                    } else if (numberForTestingSkills == 3) {
+                        useAttack(Attack.AttackTypeName.PURPLE_EXPLOSION_HIT, playerCharacter.getTrueX(),
+                                playerCharacter.getAttackingY(), -1);
                         numberForTestingSkills = 0;
                     }
                 }

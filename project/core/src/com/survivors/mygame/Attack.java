@@ -19,28 +19,29 @@ public class Attack extends Mobile {
     public enum AttackTypeName {
         FIREBALL_EFFECT, FIREBALL_HIT, FIREBALL_SKILL_NO_REPEAT_HIT_TESTING, FIREBALL_SKILL,
         DRAGON_SLASH_HIT, DRAGON_SLASH_SKILL,
-        SHADOWY_SMACK_HIT, SHADOWY_SMACK_SKILL
+        SHADOWY_SMACK_HIT, SHADOWY_SMACK_SKILL,
+        PURPLE_EXPLOSION_HIT,
+        LIGHT_SWORD_EFFECT, LIGHT_SWORD_HIT, LIGHT_SWORD_SKILL
     }
 
     public enum AimingDirections {
         FACING, BEHIND, LEFT_RIGHT, UP_DOWN, TOWARD_MOUSE, NONE, CLOSEST_ENEMY
     }
 
-    private int dataIndex;
+    private final int dataIndex;
     private int damage;
     private int pierceTotal = 0;
     private int pierceLimit;
     private float frameTime = 0;
     private float totalTime = 0;
     private int frame;
-    private int isFacingLeft;
-    private float rotation;
+    private final int isFacingLeft;
+    private final float rotation;
     private boolean toBeDestroyed = false;
     private boolean additionalAttackOnHitMustHappen = false;
     private final HashSet<Integer> alreadyHitTheseEnemies = new HashSet<>();
     // justHitEnemyData is for when a skill hits multiple enemies on the same frame --> the game can then make the additionalAttackOnHit for each of them. Then it is cleared.
-    private ArrayList<JustHitEnemyData> justHitEnemyData = new ArrayList<>();
-    private Integer lastHitEnemyId;
+    private final ArrayList<JustHitEnemyData> justHitEnemyData = new ArrayList<>();
 
     public Attack(AttackTypeName attackTypeName, float x, float y, float angle, int isFacingLeft, World world, PhysicsShapeCache physicsShapeCache) {
         this.dataIndex = attackTypeName.ordinal();
@@ -116,14 +117,6 @@ public class Attack extends Mobile {
                 realRotation);
     }
 
-    public void faceRight() {
-        this.isFacingLeft = -1;
-    }
-
-    public void faceLeft() {
-        this.isFacingLeft = 1;
-    }
-
     /**
      * Returns the damage amount and deals with pierces.
      *
@@ -164,6 +157,14 @@ public class Attack extends Mobile {
 
     public void recordHitEnemy(Integer newEnemyId) {
         this.alreadyHitTheseEnemies.add(newEnemyId);
+    }
+
+    public void copyIntoAlreadyHitTheseEnemies(HashSet<Integer> theHashSet) {
+        this.alreadyHitTheseEnemies.addAll(theHashSet);
+    }
+
+    public HashSet<Integer> getAlreadyHitTheseEnemies() {
+        return alreadyHitTheseEnemies;
     }
 
     public void scheduleAdditionalAttack(Integer newEnemyId, float hitEnemyWhoIsAtX, float hitEnemyWhoIsAtY) {

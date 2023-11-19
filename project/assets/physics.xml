@@ -245,6 +245,22 @@
 		</fixture>
 	</body>
 
+	<body name="purple explosion">
+		<is_dynamic/>
+		<linear_damping>0</linear_damping>
+		<angular_damping>0</angular_damping>
+		<fixture>
+			<density>2</density>
+			<friction>0</friction>
+			<restitution>0</restitution>
+			<filter_category_bits>1</filter_category_bits>
+			<filter_mask_bits>65535</filter_mask_bits>
+			<filter_group_index>0</filter_group_index>
+			<is_sensor/>
+			<polygon>247.0000, 0.0000, 246.0000, 274.0000, 0.0000, 274.0000, 0.0000, 0.0000</polygon>
+		</fixture>
+	</body>
+
 	<metadata>
 		<format>1</format>
 		<ptm_ratio>256</ptm_ratio>
