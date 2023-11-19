@@ -101,6 +101,32 @@ public class AttackData {
                 this.additionalAttackOnHit = Attack.AttackTypeName.FIREBALL_HIT;
                 this.aimingPattern = Attack.AimingDirections.LEFT_RIGHT;
                 break;
+            case DRAGON_SLASH_HIT:
+                this.dimensionX = 302;
+                this.dimensionY = 246;
+                this.originX = this.dimensionX / 2;
+                this.originY = this.dimensionY / 2;
+                this.animationFrameDelays = new ArrayList<>(Arrays.asList(0.090f, 0.090f, 0.090f, 0.090f, 0.090f, 0.090f));
+                makeAnimationFrames("dragon slash/hit.png");
+                this.lifetime = 0.540f;
+                this.aimingPattern = Attack.AimingDirections.NONE;
+                break;
+            case DRAGON_SLASH_SKILL:
+                this.dimensionX = 330;
+                this.dimensionY = 216;
+                this.originX = 289;
+                this.originY = 147;
+                this.animationFrameDelays = new ArrayList<>(Arrays.asList(0.120f, 0.120f, 0.120f, 0.120f));
+                makeAnimationFrames("dragon slash/skill.png");
+                this.hasCollisionBody = true;
+                this.internalCollisionBodyName = "dragon slash";
+                this.lifetime = 0.480f;
+                this.damage = 150;
+                this.hasAdditionalAttackOnHit = true;
+                this.additionalAttackOnHit = Attack.AttackTypeName.DRAGON_SLASH_HIT;
+                this.aimingPattern = Attack.AimingDirections.FACING;
+                this.flipNotRotate = true;
+                break;
             default:
                 System.out.println("Why was an ATTACK almost generated with no matching type name? attackTypeName:  " + attackTypeName);
         }

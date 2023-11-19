@@ -147,13 +147,14 @@ public class MyGame extends ApplicationAdapter {
     // End of menu variables and stuff
     // For testing attacks below:
     private float tempReuseTime = 0.4f;
+    private int numberForTestingSkills = 0;
     private float timeTracker = 0;
     private int additionalProjectiles = 3;
     private final ArrayList<Attack> allAttacks = new ArrayList<>();
     // End of stuff for testing attacks
     // For identifying one entity (Attack, Character) from another:
     private static Integer nextEntityId = 0;
-    Music appropriateSong;
+    private Music appropriateSong;
 
 
     @Override
@@ -338,7 +339,7 @@ public class MyGame extends ApplicationAdapter {
         testEnemy6.init(Character.CharacterTypeName.BIRD, 3, 14, 0, world, physicsShapeCache);
         testEnemy6.setState(Character.CharacterState.MOVING);
         testEnemy6.faceRight();
-        testEnemy6.move(3, 1, 6); // Movement as a vector. It gets normalized and then scaled
+        testEnemy6.move(1, 6, 6); // Movement as a vector. It gets normalized and then scaled
 
         playerCharacter = new PlayerCharacter(36, 23, world, physicsShapeCache);
 
@@ -529,8 +530,11 @@ public class MyGame extends ApplicationAdapter {
 
         for (int i = allAttacks.size() - 1; i >= 0; i--) {
             if (allAttacks.get(i).getAdditionalAttackOnHitMustHappen()) {
-                useAttack(allAttacks.get(i).getAdditionalAttackOnHit(), allAttacks.get(i).getHitEnemyWhoIsAtX(),
-                        allAttacks.get(i).getHitEnemyWhoIsAtY(), allAttacks.get(i).getLastHitEnemyId());
+                for (int j = 0; j < allAttacks.get(i).getJustHitEnemyData().size(); j++) {
+                    JustHitEnemyData data = allAttacks.get(i).getJustHitEnemyData().get(j);
+                    useAttack(allAttacks.get(i).getAdditionalAttackOnHit(), data.enemyX(),
+                            data.enemyY(), data.enemyId());
+                }
                 allAttacks.get(i).setAdditionalAttackOnHitMustHappen(false);
             }
             if (allAttacks.get(i).isToBeDestroyed()) {
@@ -636,10 +640,18 @@ public class MyGame extends ApplicationAdapter {
                 timeTracker += STEP_TIME;
                 if (timeTracker > tempReuseTime) {
                     timeTracker -= tempReuseTime;
-                    useAttack(Attack.AttackTypeName.FIREBALL_EFFECT, playerCharacter.getTrueX(),
-                            playerCharacter.getAttackingY(), -1);
-                    useAttack(Attack.AttackTypeName.FIREBALL_SKILL, playerCharacter.getTrueX(),
-                            playerCharacter.getAttackingY(), -1);
+                    if (numberForTestingSkills == 0) { // TEST FIREBALL
+                        useAttack(Attack.AttackTypeName.FIREBALL_EFFECT, playerCharacter.getTrueX(),
+                                playerCharacter.getAttackingY(), -1);
+                        useAttack(Attack.AttackTypeName.FIREBALL_SKILL, playerCharacter.getTrueX(),
+                                playerCharacter.getAttackingY(), -1);
+                        numberForTestingSkills++;
+                    } else if (numberForTestingSkills == 1) {
+                        useAttack(Attack.AttackTypeName.DRAGON_SLASH_SKILL, playerCharacter.getTrueX(),
+                                playerCharacter.getAttackingY(), -1);
+                        System.out.println("ATTACK STARTED ---------------------");
+                        numberForTestingSkills = 0;
+                    }
                 }
                 // Remove above later
                 world.step(STEP_TIME, VELOCITY_ITERATIONS, POSITION_ITERATIONS);

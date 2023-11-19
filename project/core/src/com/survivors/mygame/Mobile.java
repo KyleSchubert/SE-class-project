@@ -27,7 +27,7 @@ public class Mobile {
         }
         Body body = physicsShapeCache.createBody(name, world, isFacingLeft * SCALE_FACTOR, SCALE_FACTOR);
         angle *= MathUtils.degreesToRadians;
-        if (isFacingLeft == 1 && !name.equals("void")) { // TODO: Why do circles not work with this entire function? And why is this if statement actually needed? Is it needed? We'll know after more examples of Attacks.
+        if (isFacingLeft == 1 && !name.equals("void")) {
             angle += 3.1415956f;
         }
         double realX = x - (Math.cos(angle) * isFacingLeft * originX - Math.sin(angle) * originY);

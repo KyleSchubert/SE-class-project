@@ -189,23 +189,6 @@
 		<allow_sleep/>
 	</body>
 
-	<body name="test">
-		<is_dynamic/>
-		<linear_damping>0</linear_damping>
-		<angular_damping>0</angular_damping>
-		<allow_sleep/>
-		<fixture>
-			<density>2</density>
-			<friction>0</friction>
-			<restitution>0</restitution>
-			<filter_category_bits>1</filter_category_bits>
-			<filter_mask_bits>65535</filter_mask_bits>
-			<filter_group_index>0</filter_group_index>
-			<is_sensor/>
-			<polygon>389.0000, 295.0000, 0.0000, 295.0000, -101.0000, 143.0000, 0.0000, 0.0000, 389.0000, 0.0000</polygon>
-		</fixture>
-	</body>
-
 	<body name="fireball">
 		<is_dynamic/>
 		<linear_damping>0</linear_damping>
@@ -227,6 +210,23 @@
 		<linear_damping>0</linear_damping>
 		<angular_damping>0</angular_damping>
 		<allow_sleep/>
+	</body>
+
+	<body name="dragon slash">
+		<is_dynamic/>
+		<linear_damping>0</linear_damping>
+		<angular_damping>0</angular_damping>
+		<fixture>
+			<density>2</density>
+			<friction>0</friction>
+			<restitution>0</restitution>
+			<filter_category_bits>1</filter_category_bits>
+			<filter_mask_bits>65535</filter_mask_bits>
+			<filter_group_index>0</filter_group_index>
+			<is_sensor/>
+			<polygon>300.0000, 213.0000, 77.0000, 213.0000, 28.0000, 185.0000, 231.0000, -1.0000, 300.0000, -1.0000</polygon>
+			<polygon>28.0000, 74.0000, 231.0000, -1.0000, 28.0000, 185.0000</polygon>
+		</fixture>
 	</body>
 
 	<metadata>

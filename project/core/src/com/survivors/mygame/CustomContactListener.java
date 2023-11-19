@@ -23,8 +23,7 @@ public class CustomContactListener implements ContactListener {
                 return;
             }
             attack.recordHitEnemy(enemy.getEnemyId());
-            attack.setHitEnemyWhoIsAtX(enemy.getTrueX());
-            attack.setHitEnemyWhoIsAtY(enemy.getAttackingY());
+            attack.scheduleAdditionalAttack(enemy.getEnemyId(), enemy.getTrueX(), enemy.getAttackingY());
             enemy.takeDamage(attack.dealDamage());
         }
 

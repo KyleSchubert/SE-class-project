@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.physics.box2d.World;
 import com.codeandweb.physicseditor.PhysicsShapeCache;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 import static com.survivors.mygame.MyGame.ALL_ATTACK_DATA;
@@ -16,7 +17,8 @@ import static com.survivors.mygame.MyGame.SCALE_FACTOR;
  */
 public class Attack extends Mobile {
     public enum AttackTypeName {
-        FIREBALL_EFFECT, FIREBALL_HIT, FIREBALL_SKILL_NO_REPEAT_HIT_TESTING, FIREBALL_SKILL
+        FIREBALL_EFFECT, FIREBALL_HIT, FIREBALL_SKILL_NO_REPEAT_HIT_TESTING, FIREBALL_SKILL,
+        DRAGON_SLASH_HIT, DRAGON_SLASH_SKILL
     }
 
     public enum AimingDirections {
@@ -34,9 +36,9 @@ public class Attack extends Mobile {
     private float rotation;
     private boolean toBeDestroyed = false;
     private boolean additionalAttackOnHitMustHappen = false;
-    private float hitEnemyWhoIsAtX;
-    private float hitEnemyWhoIsAtY;
-    private HashSet<Integer> alreadyHitTheseEnemies = new HashSet<>();
+    private final HashSet<Integer> alreadyHitTheseEnemies = new HashSet<>();
+    // justHitEnemyData is for when a skill hits multiple enemies on the same frame --> the game can then make the additionalAttackOnHit for each of them. Then it is cleared.
+    private ArrayList<JustHitEnemyData> justHitEnemyData = new ArrayList<>();
     private Integer lastHitEnemyId;
 
     public Attack(AttackTypeName attackTypeName, float x, float y, float angle, int isFacingLeft, World world, PhysicsShapeCache physicsShapeCache) {
@@ -44,10 +46,17 @@ public class Attack extends Mobile {
         this.damage = ALL_ATTACK_DATA.get(dataIndex).getDamage();
         this.pierceLimit = ALL_ATTACK_DATA.get(dataIndex).getPierceCount();
         if (ALL_ATTACK_DATA.get(dataIndex).hasCollisionBody()) {
+            float newAngle = angle;
+            if (ALL_ATTACK_DATA.get(dataIndex).isFlipNotRotate()) {
+                newAngle = 0;
+                if (isFacingLeft == 1) {
+                    newAngle = 180;
+                }
+            }
             this.makeBody(ALL_ATTACK_DATA.get(dataIndex).getInternalCollisionBodyName(), x, y,
                     ALL_ATTACK_DATA.get(dataIndex).getOriginX() * SCALE_FACTOR,
                     (ALL_ATTACK_DATA.get(dataIndex).getDimensionY() - ALL_ATTACK_DATA.get(dataIndex).getOriginY()) * SCALE_FACTOR,
-                    angle, isFacingLeft, // WAS angle + (180 * isFacingLeft)
+                    newAngle, isFacingLeft, // WAS angle + (180 * isFacingLeft)
                     world, physicsShapeCache);
         } else {
             if (ALL_ATTACK_DATA.get(dataIndex).isFlipNotRotate() && !ALL_ATTACK_DATA.get(dataIndex).isAttackingHorizontally()) {
@@ -148,32 +157,23 @@ public class Attack extends Mobile {
         return ALL_ATTACK_DATA.get(dataIndex).getAdditionalAttackOnHit();
     }
 
-    public float getHitEnemyWhoIsAtX() {
-        return hitEnemyWhoIsAtX;
-    }
-
-    public void setHitEnemyWhoIsAtX(float hitEnemyWhoIsAtX) {
-        this.hitEnemyWhoIsAtX = hitEnemyWhoIsAtX;
-    }
-
-    public float getHitEnemyWhoIsAtY() {
-        return hitEnemyWhoIsAtY;
-    }
-
-    public void setHitEnemyWhoIsAtY(float hitEnemyWhoIsAtY) {
-        this.hitEnemyWhoIsAtY = hitEnemyWhoIsAtY;
-    }
-
     public boolean hasAlreadyHitThisEnemy(Integer enemyIdToTest) {
         return this.alreadyHitTheseEnemies.contains(enemyIdToTest);
     }
 
     public void recordHitEnemy(Integer newEnemyId) {
-        this.lastHitEnemyId = newEnemyId;
         this.alreadyHitTheseEnemies.add(newEnemyId);
     }
 
-    public Integer getLastHitEnemyId() {
-        return lastHitEnemyId;
+    public void scheduleAdditionalAttack(Integer newEnemyId, float hitEnemyWhoIsAtX, float hitEnemyWhoIsAtY) {
+        this.justHitEnemyData.add(new JustHitEnemyData(newEnemyId, hitEnemyWhoIsAtX, hitEnemyWhoIsAtY));
+    }
+
+    public ArrayList<JustHitEnemyData> getJustHitEnemyData() {
+        return this.justHitEnemyData;
+    }
+
+    public void clearJustHitEnemyData() {
+        this.justHitEnemyData.clear();
     }
 }
