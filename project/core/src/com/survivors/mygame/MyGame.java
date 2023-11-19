@@ -149,7 +149,7 @@ public class MyGame extends ApplicationAdapter {
     private final float tempReuseTime = 0.4f;
     private int numberForTestingSkills = 0;
     private float timeTracker = 0;
-    private final int additionalProjectiles = 3;
+    private final int additionalProjectiles = 0;
     private final ArrayList<Attack> allAttacks = new ArrayList<>();
     // End of stuff for testing attacks
     // For identifying one entity (Attack, Character) from another:
@@ -669,6 +669,10 @@ public class MyGame extends ApplicationAdapter {
                                 playerCharacter.getAttackingY(), -1);
                         useAttack(Attack.AttackTypeName.LIGHT_SWORD_SKILL, playerCharacter.getTrueX(),
                                 playerCharacter.getAttackingY(), -1);
+                        numberForTestingSkills++;
+                    } else if (numberForTestingSkills == 5) {
+                        useAttack(Attack.AttackTypeName.LIGHT_BALL_SKILL, playerCharacter.getTrueX(),
+                                playerCharacter.getAttackingY(), -1);
                         numberForTestingSkills = 0;
                     }
                 }
@@ -1053,11 +1057,11 @@ public class MyGame extends ApplicationAdapter {
                     float newSpawnY = spawnY;
 
                     float angle = 0;
-                    float xComponent = 1;
+                    float xComponent = -1;
                     float yComponent = 0;
                     if (playerCharacter.getIsFacingLeft() == -1) { // FACING RIGHT
                         angle = 180;
-                        xComponent = -1;
+                        xComponent = 1;
                     }
 
                     if (ALL_ATTACK_DATA.get(index).getAimingPattern() == Attack.AimingDirections.BEHIND && ALL_ATTACK_DATA.get(index).isRotatableProjectile()) {
@@ -1074,6 +1078,7 @@ public class MyGame extends ApplicationAdapter {
                         if (totalProj % 2 == 1) {
                             newSpawnY -= 12 * SCALE_FACTOR;
                         }
+                        angle -= 180;
                     }
 
                     Attack tempAttack = new Attack(attackTypeName, spawnX, newSpawnY,

@@ -210,6 +210,35 @@ public class AttackData {
                 this.additionalAttackOnHit = Attack.AttackTypeName.LIGHT_SWORD_HIT;
                 this.aimingPattern = Attack.AimingDirections.UP_DOWN;
                 break;
+            case LIGHT_BALL_HIT:
+                this.dimensionX = 303;
+                this.dimensionY = 238;
+                this.originX = this.dimensionX / 2;
+                this.originY = this.dimensionY / 2;
+                this.animationFrameDelays = new ArrayList<>(Arrays.asList(0.090f, 0.090f, 0.090f, 0.090f, 0.090f, 0.090f, 0.090f, 0.090f));
+                makeAnimationFrames("light ball/hit.png");
+                this.lifetime = 0.720f;
+                this.aimingPattern = Attack.AimingDirections.NONE;
+                break;
+            case LIGHT_BALL_SKILL:
+                this.dimensionX = 52;
+                this.dimensionY = 53;
+                this.originX = this.dimensionX / 2;
+                this.originY = this.dimensionY / 2;
+                this.animationFrameDelays = new ArrayList<>(Arrays.asList(0.060f, 0.060f, 0.060f, 0.060f, 0.060f, 0.060f, 0.060f, 0.060f));
+                makeAnimationFrames("light ball/skill.png");
+                this.isLooping = true;
+                this.hasCollisionBody = true;
+                this.internalCollisionBodyName = "light ball";
+                this.lifetime = 1.5f;
+                this.isProjectile = true;
+                this.projectileCount = 1;
+                this.projectileSpeed = 10;
+                this.damage = 320;
+                this.hasAdditionalAttackOnHit = true;
+                this.additionalAttackOnHit = Attack.AttackTypeName.LIGHT_BALL_HIT;
+                this.aimingPattern = Attack.AimingDirections.FACING;
+                break;
             default:
                 System.out.println("Why was an ATTACK almost generated with no matching type name? attackTypeName:  " + attackTypeName);
         }
