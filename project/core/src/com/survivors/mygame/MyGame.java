@@ -663,6 +663,12 @@ public class MyGame extends ApplicationAdapter {
                     } else if (numberForTestingSkills == 3) {
                         useAttack(Attack.AttackTypeName.PURPLE_EXPLOSION_HIT, playerCharacter.getTrueX(),
                                 playerCharacter.getAttackingY(), -1);
+                        numberForTestingSkills++;
+                    } else if (numberForTestingSkills == 4) {
+                        useAttack(Attack.AttackTypeName.LIGHT_SWORD_EFFECT, playerCharacter.getTrueX(),
+                                playerCharacter.getAttackingY(), -1);
+                        useAttack(Attack.AttackTypeName.LIGHT_SWORD_SKILL, playerCharacter.getTrueX(),
+                                playerCharacter.getAttackingY(), -1);
                         numberForTestingSkills = 0;
                     }
                 }

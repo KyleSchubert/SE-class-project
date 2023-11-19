@@ -170,6 +170,46 @@ public class AttackData {
                 this.aimingPattern = Attack.AimingDirections.NONE;
                 this.trackAllOldHitEnemies = true;
                 break;
+            case LIGHT_SWORD_EFFECT:
+                this.dimensionX = 322;
+                this.dimensionY = 262;
+                this.originX = 89;
+                this.originY = 178;
+                this.animationFrameDelays = new ArrayList<>(Arrays.asList(0.090f, 0.090f, 0.090f, 0.090f, 0.090f, 0.090f, 0.090f, 0.090f));
+                makeAnimationFrames("light sword/char effect.png");
+                this.lifetime = 0.720f;
+                this.aimingPattern = Attack.AimingDirections.UP_DOWN;
+                this.flipNotRotate = true;
+                break;
+            case LIGHT_SWORD_HIT:
+                this.dimensionX = 212;
+                this.dimensionY = 137;
+                this.originX = this.dimensionX / 2;
+                this.originY = this.dimensionY / 2;
+                this.animationFrameDelays = new ArrayList<>(Arrays.asList(0.090f, 0.090f, 0.090f, 0.090f, 0.090f));
+                makeAnimationFrames("light sword/hit.png");
+                this.lifetime = 0.450f;
+                this.aimingPattern = Attack.AimingDirections.NONE;
+                break;
+            case LIGHT_SWORD_SKILL:
+                this.dimensionX = 529;
+                this.dimensionY = 161;
+                this.originX = 298;
+                this.originY = 105;
+                this.animationFrameDelays = new ArrayList<>(Arrays.asList(0.030f, 0.030f, 0.030f, 0.030f, 0.030f, 0.030f, 0.030f, 0.120f, 0.120f, 0.120f, 0.120f, 0.090f, 0.060f, 0.060f, 0.060f));
+                makeAnimationFrames("light sword/skill.png");
+                this.hasCollisionBody = true;
+                this.internalCollisionBodyName = "light sword";
+                this.lifetime = 0.960f;
+                this.pierceCount = 3;
+                this.isProjectile = true;
+                this.projectileCount = 5;
+                this.projectileSpeed = 64;
+                this.damage = 110;
+                this.hasAdditionalAttackOnHit = true;
+                this.additionalAttackOnHit = Attack.AttackTypeName.LIGHT_SWORD_HIT;
+                this.aimingPattern = Attack.AimingDirections.UP_DOWN;
+                break;
             default:
                 System.out.println("Why was an ATTACK almost generated with no matching type name? attackTypeName:  " + attackTypeName);
         }
