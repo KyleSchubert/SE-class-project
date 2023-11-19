@@ -13,7 +13,7 @@ public class CustomContactListener implements ContactListener {
         if (fixtureA.getBody().getUserData() == null || fixtureB.getBody().getUserData() == null) return;
 
         if (this.checkFor(fixtureA, fixtureB, "enemy", "attack")) {
-            Pair<EntityData, EntityData> pair = getEntityOfType(fixtureA, fixtureB, "attack");
+            Pair<EntityData> pair = getEntityOfType(fixtureA, fixtureB, "attack");
             Enemy enemy = (Enemy) pair.b().entity();
             if (enemy.getState() == Character.CharacterState.DYING) {
                 return;
@@ -29,24 +29,10 @@ public class CustomContactListener implements ContactListener {
 
         // System.out.println(fixtureA.getBody().getUserData() + " <-- touched --> " + fixtureB.getBody().getUserData());
 
-        /*
-        if (checkFor(fixtureA, fixtureB, "pinball", "despawn line")) {
-            pinball.setId("pinball", "dead");
-        }
-        else if (checkFor(fixtureA, fixtureB, "pinball", "bumper")) {
-            pinball.setId("bumpedPinball", getNonPinballEntityData(fixtureA, fixtureB).id());
-        }
-        */
     }
 
     @Override
     public void endContact(Contact contact) {
-        /*
-        Fixture fixtureA = contact.getFixtureA();
-        Fixture fixtureB = contact.getFixtureB();
-        if (fixtureA == null || fixtureB == null) return;
-        if (fixtureA.getUserData() == null || fixtureB.getUserData() == null) return;
-         */
 
     }
 
@@ -79,7 +65,7 @@ public class CustomContactListener implements ContactListener {
     }
 
     // Data structure that is only useful for the getEntityOfType() function
-    public record Pair<A, B>(A a, B b) {
+    public record Pair<EntityData>(EntityData a, EntityData b) {
     }
 
     /**
@@ -88,13 +74,13 @@ public class CustomContactListener implements ContactListener {
      * @param lookingForEntityType The type of entity that you are looking for. A type like "enemy", "player", "attack"
      * @return Returns a pair in order where the first entity is the one with the type you're looking for and the other is not.
      */
-    private Pair getEntityOfType(Fixture fixtureA, Fixture fixtureB, String lookingForEntityType) {
+    private Pair<EntityData> getEntityOfType(Fixture fixtureA, Fixture fixtureB, String lookingForEntityType) {
         EntityData entityData1 = (EntityData) fixtureA.getBody().getUserData();
         EntityData entityData2 = (EntityData) fixtureB.getBody().getUserData();
         if (entityData1.entityType().equals(lookingForEntityType)) {
-            return new Pair(entityData1, entityData2);
+            return new Pair<>(entityData1, entityData2);
         } else {
-            return new Pair(entityData2, entityData1);
+            return new Pair<>(entityData2, entityData1);
         }
     }
 }
