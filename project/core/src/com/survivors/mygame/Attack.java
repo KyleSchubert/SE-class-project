@@ -18,7 +18,8 @@ import static com.survivors.mygame.MyGame.SCALE_FACTOR;
 public class Attack extends Mobile {
     public enum AttackTypeName {
         FIREBALL_EFFECT, FIREBALL_HIT, FIREBALL_SKILL_NO_REPEAT_HIT_TESTING, FIREBALL_SKILL,
-        DRAGON_SLASH_HIT, DRAGON_SLASH_SKILL
+        DRAGON_SLASH_HIT, DRAGON_SLASH_SKILL,
+        SHADOWY_SMACK_HIT, SHADOWY_SMACK_SKILL
     }
 
     public enum AimingDirections {

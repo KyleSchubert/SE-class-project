@@ -650,6 +650,11 @@ public class MyGame extends ApplicationAdapter {
                         useAttack(Attack.AttackTypeName.DRAGON_SLASH_SKILL, playerCharacter.getTrueX(),
                                 playerCharacter.getAttackingY(), -1);
                         System.out.println("ATTACK STARTED ---------------------");
+                        numberForTestingSkills++;
+                    } else if (numberForTestingSkills == 2) {
+                        useAttack(Attack.AttackTypeName.SHADOWY_SMACK_SKILL, playerCharacter.getTrueX(),
+                                playerCharacter.getAttackingY(), -1);
+                        System.out.println("ATTACK STARTED ---------------------");
                         numberForTestingSkills = 0;
                     }
                 }

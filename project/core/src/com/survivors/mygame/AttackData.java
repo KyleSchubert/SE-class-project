@@ -124,6 +124,32 @@ public class AttackData {
                 this.damage = 150;
                 this.hasAdditionalAttackOnHit = true;
                 this.additionalAttackOnHit = Attack.AttackTypeName.DRAGON_SLASH_HIT;
+                this.aimingPattern = Attack.AimingDirections.BEHIND;
+                this.flipNotRotate = true;
+                break;
+            case SHADOWY_SMACK_HIT:
+                this.dimensionX = 236;
+                this.dimensionY = 229;
+                this.originX = this.dimensionX / 2;
+                this.originY = this.dimensionY / 2;
+                this.animationFrameDelays = new ArrayList<>(Arrays.asList(0.090f, 0.090f, 0.090f, 0.090f, 0.090f));
+                makeAnimationFrames("shadowy smack/hit.png");
+                this.lifetime = 0.450f;
+                this.aimingPattern = Attack.AimingDirections.NONE;
+                break;
+            case SHADOWY_SMACK_SKILL:
+                this.dimensionX = 544;
+                this.dimensionY = 549;
+                this.originX = 347;
+                this.originY = 310;
+                this.animationFrameDelays = new ArrayList<>(Arrays.asList(0.120f, 0.120f, 0.060f, 0.060f, 0.060f, 0.030f, 0.030f));
+                makeAnimationFrames("shadowy smack/skill.png");
+                this.hasCollisionBody = true;
+                this.internalCollisionBodyName = "shadowy smack";
+                this.lifetime = 0.480f;
+                this.damage = 260;
+                this.hasAdditionalAttackOnHit = true;
+                this.additionalAttackOnHit = Attack.AttackTypeName.SHADOWY_SMACK_HIT;
                 this.aimingPattern = Attack.AimingDirections.FACING;
                 this.flipNotRotate = true;
                 break;
