@@ -22,7 +22,8 @@ public class Attack extends Mobile {
         SHADOWY_SMACK_HIT, SHADOWY_SMACK_SKILL,
         PURPLE_EXPLOSION_HIT,
         LIGHT_SWORD_EFFECT, LIGHT_SWORD_HIT, LIGHT_SWORD_SKILL,
-        LIGHT_BALL_HIT, LIGHT_BALL_SKILL
+        LIGHT_BALL_HIT, LIGHT_BALL_SKILL,
+        MOON_SPIN_HIT, MOON_SPIN_SKILL
     }
 
     public enum AimingDirections {

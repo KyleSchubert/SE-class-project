@@ -239,6 +239,32 @@ public class AttackData {
                 this.additionalAttackOnHit = Attack.AttackTypeName.LIGHT_BALL_HIT;
                 this.aimingPattern = Attack.AimingDirections.FACING;
                 break;
+            case MOON_SPIN_SKILL:
+                this.dimensionX = 885;
+                this.dimensionY = 402;
+                this.originX = 443;
+                this.originY = 257;
+                this.animationFrameDelays = new ArrayList<>(Arrays.asList(0.090f, 0.090f, 0.090f, 0.090f, 0.090f, 0.090f, 0.060f, 0.060f, 0.060f, 0.060f, 0.060f, 0.060f, 0.060f, 0.060f));
+                makeAnimationFrames("moon spin/skill.png");
+                this.hasCollisionBody = true;
+                this.internalCollisionBodyName = "moon spin";
+                this.lifetime = 1.020f;
+                this.damage = 360;
+                this.hasAdditionalAttackOnHit = true;
+                this.additionalAttackOnHit = Attack.AttackTypeName.MOON_SPIN_HIT;
+                this.aimingPattern = Attack.AimingDirections.FACING;
+                this.flipNotRotate = true;
+                break;
+            case MOON_SPIN_HIT:
+                this.dimensionX = 242;
+                this.dimensionY = 242;
+                this.originX = this.dimensionX / 2;
+                this.originY = this.dimensionY / 2;
+                this.animationFrameDelays = new ArrayList<>(Arrays.asList(0.090f, 0.090f, 0.090f, 0.090f, 0.090f, 0.090f, 0.090f, 0.090f));
+                makeAnimationFrames("moon spin/hit.png");
+                this.lifetime = 0.720f;
+                this.aimingPattern = Attack.AimingDirections.NONE;
+                break;
             default:
                 System.out.println("Why was an ATTACK almost generated with no matching type name? attackTypeName:  " + attackTypeName);
         }

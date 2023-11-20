@@ -293,6 +293,22 @@
 		</fixture>
 	</body>
 
+	<body name="moon spin">
+		<is_dynamic/>
+		<linear_damping>0</linear_damping>
+		<angular_damping>0</angular_damping>
+		<fixture>
+			<density>2</density>
+			<friction>0</friction>
+			<restitution>0</restitution>
+			<filter_category_bits>1</filter_category_bits>
+			<filter_mask_bits>65535</filter_mask_bits>
+			<filter_group_index>0</filter_group_index>
+			<is_sensor/>
+			<polygon>162.0000, 299.0000, 161.0000, 113.0000, 730.0000, 113.0000, 728.0000, 299.0000</polygon>
+		</fixture>
+	</body>
+
 	<metadata>
 		<format>1</format>
 		<ptm_ratio>256</ptm_ratio>

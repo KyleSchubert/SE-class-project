@@ -673,6 +673,10 @@ public class MyGame extends ApplicationAdapter {
                     } else if (numberForTestingSkills == 5) {
                         useAttack(Attack.AttackTypeName.LIGHT_BALL_SKILL, playerCharacter.getTrueX(),
                                 playerCharacter.getAttackingY(), -1);
+                        numberForTestingSkills++;
+                    } else if (numberForTestingSkills == 6) {
+                        useAttack(Attack.AttackTypeName.MOON_SPIN_SKILL, playerCharacter.getTrueX(),
+                                playerCharacter.getAttackingY(), -1);
                         numberForTestingSkills = 0;
                     }
                 }
