@@ -23,7 +23,8 @@ public class Attack extends Mobile {
         PURPLE_EXPLOSION_HIT,
         LIGHT_SWORD_EFFECT, LIGHT_SWORD_HIT, LIGHT_SWORD_SKILL,
         LIGHT_BALL_HIT, LIGHT_BALL_SKILL,
-        MOON_SPIN_HIT, MOON_SPIN_SKILL
+        MOON_SPIN_HIT, MOON_SPIN_SKILL,
+        FANCY_SWORD_HIT, FANCY_SWORD_SKILL
     }
 
     public enum AimingDirections {

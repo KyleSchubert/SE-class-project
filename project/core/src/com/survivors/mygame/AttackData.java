@@ -265,6 +265,32 @@ public class AttackData {
                 this.lifetime = 0.720f;
                 this.aimingPattern = Attack.AimingDirections.NONE;
                 break;
+            case FANCY_SWORD_HIT:
+                this.dimensionX = 478;
+                this.dimensionY = 488;
+                this.originX = this.dimensionX / 2;
+                this.originY = this.dimensionY / 2;
+                this.animationFrameDelays = new ArrayList<>(Arrays.asList(0.090f, 0.090f, 0.090f, 0.090f, 0.090f, 0.090f, 0.090f, 0.090f, 0.090f));
+                makeAnimationFrames("fancy sword/hit.png");
+                this.lifetime = 0.810f;
+                this.aimingPattern = Attack.AimingDirections.NONE;
+                break;
+            case FANCY_SWORD_SKILL:
+                this.dimensionX = 1059;
+                this.dimensionY = 667;
+                this.originX = 347;
+                this.originY = 310;
+                this.animationFrameDelays = new ArrayList<>(Arrays.asList(0.030f, 0.090f, 0.090f, 0.120f, 0.120f, 0.120f, 0.120f, 0.120f, 0.090f, 0.090f, 0.090f, 0.090f, 0.090f));
+                makeAnimationFrames("fancy sword/skill.png");
+                this.hasCollisionBody = true;
+                this.internalCollisionBodyName = "fancy sword";
+                this.lifetime = 1.260f;
+                this.damage = 260;
+                this.hasAdditionalAttackOnHit = true;
+                this.additionalAttackOnHit = Attack.AttackTypeName.FANCY_SWORD_HIT;
+                this.aimingPattern = Attack.AimingDirections.LEFT_RIGHT;
+                this.flipNotRotate = true;
+                break;
             default:
                 System.out.println("Why was an ATTACK almost generated with no matching type name? attackTypeName:  " + attackTypeName);
         }
