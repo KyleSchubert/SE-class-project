@@ -101,6 +101,13 @@ public class MyGame extends ApplicationAdapter {
     Enemy testEnemy4; // ALWAYS DECLARE HERE
     Enemy testEnemy5; // ALWAYS DECLARE HERE
     Enemy testEnemy6; // ALWAYS DECLARE HERE
+
+    // Test dropped items
+    DroppedItem testDrop;
+    DroppedItem testDrop2;
+    DroppedItem testDrop3;
+    DroppedItem testDrop4;
+
     private final Array<Enemy> activeEnemies = new Array<>();
     /* Nick: GDX's Pool class for reusing class instances instead of
      *       constantly destroying and recreating them
@@ -343,6 +350,15 @@ public class MyGame extends ApplicationAdapter {
 
         playerCharacter = new PlayerCharacter(36, 23, world, physicsShapeCache);
 
+        // Initialize test dropped items
+        testDrop = new DroppedItem();
+        testDrop.test_init(0, 0, world, physicsShapeCache);
+        testDrop2 = new DroppedItem();
+        testDrop2.test_init(25, 35, world, physicsShapeCache);
+        testDrop3 = new DroppedItem();
+        testDrop3.test_init(-30, -50, world, physicsShapeCache);
+        testDrop4 = new DroppedItem();
+        testDrop4.test_init(3, 80, world, physicsShapeCache);
 
         enemies = new ArrayList<>();
         int x = 40;
@@ -420,6 +436,11 @@ public class MyGame extends ApplicationAdapter {
             D.animate(batch, elapsedTime);
         }
         */
+
+        testDrop.testAnimate(batch);
+        testDrop2.testAnimate(batch);
+        testDrop3.testAnimate(batch);
+        testDrop4.testAnimate(batch);
 
         testEnemy.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
         testEnemy2.animate(batch, elapsedTime); // AND DRAW LIKE THIS BETWEEN THE batch.begin() and batch.end()
@@ -572,6 +593,11 @@ public class MyGame extends ApplicationAdapter {
         settingsMenuStage.dispose();
         font.dispose();
         appropriateSong.dispose();
+
+        testDrop.testDispose();
+        testDrop2.testDispose();
+        testDrop3.testDispose();
+        testDrop4.testDispose();
     }
 
     // START SUGGESTED CODE FROM -> https://www.codeandweb.com/physicseditor/tutorials/libgdx-physics
@@ -686,6 +712,12 @@ public class MyGame extends ApplicationAdapter {
                 }
                 // Remove above later
                 world.step(STEP_TIME, VELOCITY_ITERATIONS, POSITION_ITERATIONS);
+
+                // dropped items move towards the player
+                testDrop.moveTowardsLocation(playerCharacter.getTrueX(), playerCharacter.getTrueY());
+                testDrop2.moveTowardsLocation(playerCharacter.getTrueX(), playerCharacter.getTrueY());
+                testDrop3.moveTowardsLocation(playerCharacter.getTrueX(), playerCharacter.getTrueY());
+                testDrop4.moveTowardsLocation(playerCharacter.getTrueX(), playerCharacter.getTrueY());
             }
             return STEP_TIME;
         } else {
