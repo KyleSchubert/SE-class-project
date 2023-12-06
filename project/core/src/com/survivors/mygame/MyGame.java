@@ -27,6 +27,7 @@ import com.codeandweb.physicseditor.PhysicsShapeCache;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Random;
 
 import static com.survivors.mygame.Character.CharacterState.DEAD;
@@ -153,7 +154,7 @@ public class MyGame extends ApplicationAdapter {
     private boolean isDrawSettingsMenu; // [12] is the corresponding action in setMenuState()
     // End of menu variables and stuff
     // For testing attacks below:
-    private final float tempReuseTime = 0.4f;
+    private final float tempReuseTime = 1.4f;
     private int numberForTestingSkills = 0;
     private float timeTracker = 0;
     private final int additionalProjectiles = 0;
@@ -162,6 +163,7 @@ public class MyGame extends ApplicationAdapter {
     // For identifying one entity (Attack, Character) from another:
     private static Integer nextEntityId = 0;
     private Music appropriateSong;
+    public static HashSet<Integer> purpleExplosionHitTracker = new HashSet<>();
 
 
     @Override
@@ -390,6 +392,36 @@ public class MyGame extends ApplicationAdapter {
             }
         }
 
+        x = 40;
+        y = 60;
+        for (Character.CharacterTypeName name : Character.CharacterTypeName.values()) {
+            for (int i = 0; i < 24; i++) {
+                Enemy enemyGridEnemy = new Enemy();
+                enemyGridEnemy.init(name, x, y, 0, world, physicsShapeCache);
+                enemies.add(enemyGridEnemy);
+                if (i % 6 == 1) {
+                    enemies.get(enemies.size() - 1).move(rand.nextInt(30) - 15, rand.nextInt(30) - 15, rand.nextInt(10));
+                } else if (i % 6 == 2) {
+                    enemies.get(enemies.size() - 1).move(rand.nextInt(30) - 15, rand.nextInt(30) - 15, rand.nextInt(20));
+                } else if (i % 6 == 3) {
+                    enemies.get(enemies.size() - 1).move(rand.nextInt(30) - 15, rand.nextInt(30) - 15, rand.nextInt(20));
+                } else if (i % 6 == 4) {
+                    enemies.get(enemies.size() - 1).move(rand.nextInt(30) - 15, rand.nextInt(30) - 15, rand.nextInt(30));
+                } else if (i % 6 == 5) {
+                    enemies.get(enemies.size() - 1).move(rand.nextInt(30) - 15, rand.nextInt(30) - 15, rand.nextInt(50));
+                } else {
+                    enemies.get(enemies.size() - 1).move(rand.nextInt(30) - 15, rand.nextInt(30) - 15, rand.nextInt(4));
+                }
+
+                if (x < 80) {
+                    x += 4;
+                } else {
+                    y += 3;
+                    x = 40;
+                }
+            }
+        }
+
         // Load in this contact listener to replace the default one
         world.setContactListener(new CustomContactListener());
 
@@ -539,7 +571,7 @@ public class MyGame extends ApplicationAdapter {
             settingsMenuStage.draw();
         }
         // DEBUG WIREFRAME:
-        debugRenderer.render(world, camera.combined);
+        // debugRenderer.render(world, camera.combined);
 
         // TODO: remove this. This is just for testing the DEAD state and if the enemies die when their hp goes to 0
         for (int i = enemies.size() - 1; i >= 0; i--) {

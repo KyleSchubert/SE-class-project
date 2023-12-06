@@ -181,4 +181,8 @@ public class Attack extends Mobile {
     public void clearJustHitEnemyData() {
         this.justHitEnemyData.clear();
     }
+
+    public int getDataIndex() {
+        return dataIndex;
+    }
 }

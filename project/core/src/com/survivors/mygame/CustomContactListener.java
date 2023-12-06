@@ -2,6 +2,8 @@ package com.survivors.mygame;
 
 import com.badlogic.gdx.physics.box2d.*;
 
+import static com.survivors.mygame.MyGame.purpleExplosionHitTracker;
+
 public class CustomContactListener implements ContactListener {
 
     @Override
@@ -19,10 +21,18 @@ public class CustomContactListener implements ContactListener {
                 return;
             }
             Attack attack = (Attack) pair.a().entity();
-            if (attack.hasAlreadyHitThisEnemy(enemy.getEnemyId())) {
-                return;
+            if (attack.getDataIndex() == Attack.AttackTypeName.PURPLE_EXPLOSION_HIT.ordinal()) {
+                if (purpleExplosionHitTracker.contains(enemy.getEnemyId())) {
+                    return;
+                } else {
+                    purpleExplosionHitTracker.add(enemy.getEnemyId());
+                }
+            } else {
+                if (attack.hasAlreadyHitThisEnemy(enemy.getEnemyId())) {
+                    return;
+                }
+                attack.recordHitEnemy(enemy.getEnemyId());
             }
-            attack.recordHitEnemy(enemy.getEnemyId());
             attack.scheduleAdditionalAttack(enemy.getEnemyId(), enemy.getTrueX(), enemy.getAttackingY());
             enemy.takeDamage(attack.dealDamage());
         }
