@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.Random;
 
 import static com.survivors.mygame.Character.CharacterState.DEAD;
+import static com.survivors.mygame.Character.CharacterState.MOVING;
 
 
 public class MyGame extends ApplicationAdapter {
@@ -154,7 +155,7 @@ public class MyGame extends ApplicationAdapter {
     private boolean isDrawSettingsMenu; // [12] is the corresponding action in setMenuState()
     // End of menu variables and stuff
     // For testing attacks below:
-    private final float tempReuseTime = 1.4f;
+    private final float tempReuseTime = 1.0f;
     private int numberForTestingSkills = 0;
     private float timeTracker = 0;
     private final int additionalProjectiles = 0;
@@ -395,28 +396,36 @@ public class MyGame extends ApplicationAdapter {
         x = 40;
         y = 60;
         for (Character.CharacterTypeName name : Character.CharacterTypeName.values()) {
-            for (int i = 0; i < 24; i++) {
+            for (int i = 0; i < 100; i++) {
                 Enemy enemyGridEnemy = new Enemy();
                 enemyGridEnemy.init(name, x, y, 0, world, physicsShapeCache);
                 enemies.add(enemyGridEnemy);
+                int xMove = rand.nextInt(30) - 15;
+                if (xMove > 0) {
+                    enemies.get(enemies.size() - 1).faceRight();
+                }
+                if (xMove == 0) {
+                    xMove = -1;
+                }
+                enemies.get(enemies.size() - 1).setState(MOVING);
                 if (i % 6 == 1) {
-                    enemies.get(enemies.size() - 1).move(rand.nextInt(30) - 15, rand.nextInt(30) - 15, rand.nextInt(10));
+                    enemies.get(enemies.size() - 1).move(xMove, rand.nextInt(30) - 15, rand.nextInt(10) + 4);
                 } else if (i % 6 == 2) {
-                    enemies.get(enemies.size() - 1).move(rand.nextInt(30) - 15, rand.nextInt(30) - 15, rand.nextInt(20));
+                    enemies.get(enemies.size() - 1).move(xMove, rand.nextInt(30) - 15, rand.nextInt(20) + 4);
                 } else if (i % 6 == 3) {
-                    enemies.get(enemies.size() - 1).move(rand.nextInt(30) - 15, rand.nextInt(30) - 15, rand.nextInt(20));
+                    enemies.get(enemies.size() - 1).move(xMove, rand.nextInt(30) - 15, rand.nextInt(20) + 4);
                 } else if (i % 6 == 4) {
-                    enemies.get(enemies.size() - 1).move(rand.nextInt(30) - 15, rand.nextInt(30) - 15, rand.nextInt(30));
+                    enemies.get(enemies.size() - 1).move(xMove, rand.nextInt(30) - 15, rand.nextInt(30) + 4);
                 } else if (i % 6 == 5) {
-                    enemies.get(enemies.size() - 1).move(rand.nextInt(30) - 15, rand.nextInt(30) - 15, rand.nextInt(50));
+                    enemies.get(enemies.size() - 1).move(xMove, rand.nextInt(30) - 15, rand.nextInt(50) + 4);
                 } else {
-                    enemies.get(enemies.size() - 1).move(rand.nextInt(30) - 15, rand.nextInt(30) - 15, rand.nextInt(4));
+                    enemies.get(enemies.size() - 1).move(xMove, rand.nextInt(30) - 15, rand.nextInt(4) + 4);
                 }
 
                 if (x < 80) {
-                    x += 4;
+                    x += 1;
                 } else {
-                    y += 3;
+                    y += 1;
                     x = 40;
                 }
             }

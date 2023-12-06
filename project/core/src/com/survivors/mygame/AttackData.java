@@ -71,9 +71,9 @@ public class AttackData {
                 this.hasCollisionBody = true;
                 this.internalCollisionBodyName = "fireball";
                 this.lifetime = 3f;
-                this.pierceCount = 1;
+                this.pierceCount = 4;
                 this.isProjectile = true;
-                this.projectileCount = 3;
+                this.projectileCount = 14;
                 this.projectileSpeed = 32;
                 this.damage = 40;
                 this.rotatableProjectile = true;
@@ -201,7 +201,7 @@ public class AttackData {
                 this.hasCollisionBody = true;
                 this.internalCollisionBodyName = "light sword";
                 this.lifetime = 0.960f;
-                this.pierceCount = 3;
+                this.pierceCount = 12;
                 this.isProjectile = true;
                 this.projectileCount = 5;
                 this.projectileSpeed = 64;
@@ -232,7 +232,7 @@ public class AttackData {
                 this.internalCollisionBodyName = "light ball";
                 this.lifetime = 1.5f;
                 this.isProjectile = true;
-                this.projectileCount = 1;
+                this.projectileCount = 4;
                 this.projectileSpeed = 10;
                 this.damage = 320;
                 this.hasAdditionalAttackOnHit = true;
