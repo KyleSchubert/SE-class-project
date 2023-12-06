@@ -6,6 +6,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.World;
 import com.codeandweb.physicseditor.PhysicsShapeCache;
 
+import static com.survivors.mygame.MyGame.SCALE_FACTOR;
+
 public class DroppedItem extends Mobile {
     // Relies on player position
     // Will be tangible
@@ -44,13 +46,13 @@ public class DroppedItem extends Mobile {
     // Test initialization
     public void test_init(float X, float Y, World world, PhysicsShapeCache physicsShapeCache) {
         makeBody("bird", X, Y, 0, world, physicsShapeCache);
-        testTexture = new Texture("amogus.png");
+        testTexture = new Texture("ITEMS/test1.png");
         testRegion = new TextureRegion(testTexture);
     }
 
     // Test animate
     public void testAnimate(SpriteBatch batch) {
-        batch.draw(testRegion, this.getX(), this.getY(), 0, 0, 5, 5, 1, 1, 0);
+        batch.draw(testRegion, this.getX(), this.getY(), 17 * SCALE_FACTOR, 16 * SCALE_FACTOR, 34, 33, 1 * SCALE_FACTOR, 1 * SCALE_FACTOR, 0);
     }
 
     // Dispose of the test texture
