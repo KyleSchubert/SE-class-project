@@ -393,6 +393,24 @@ public class MyGame extends ApplicationAdapter {
             }
         }
 
+        showCaseALotOfMovingEnemies();
+
+        // Load in this contact listener to replace the default one
+        world.setContactListener(new CustomContactListener());
+
+        setMenuState(MenuState.MAIN_MENU);
+
+        appropriateSong = Gdx.audio.newMusic(Gdx.files.classpath("RestNPeace.mp3"));
+        appropriateSong.play();
+        appropriateSong.setLooping(true);
+        // appropriateSong.pause() to pause
+        // appropriateSong.resume() to resume
+        // appropriateSong.stop() to stop playback entirely
+    }
+
+    private void showCaseALotOfMovingEnemies() {
+        int y;
+        int x;
         x = 40;
         y = 60;
         for (Character.CharacterTypeName name : Character.CharacterTypeName.values()) {
@@ -430,18 +448,6 @@ public class MyGame extends ApplicationAdapter {
                 }
             }
         }
-
-        // Load in this contact listener to replace the default one
-        world.setContactListener(new CustomContactListener());
-
-        setMenuState(MenuState.MAIN_MENU);
-
-        appropriateSong = Gdx.audio.newMusic(Gdx.files.classpath("RestNPeace.mp3"));
-        appropriateSong.play();
-        appropriateSong.setLooping(true);
-        // appropriateSong.pause() to pause
-        // appropriateSong.resume() to resume
-        // appropriateSong.stop() to stop playback entirely
     }
 
     @Override
@@ -728,6 +734,7 @@ public class MyGame extends ApplicationAdapter {
                                 playerCharacter.getAttackingY(), -1);
                         numberForTestingSkills++;
                     } else if (numberForTestingSkills == 3) {
+                        purpleExplosionHitTracker.clear();
                         useAttack(Attack.AttackTypeName.PURPLE_EXPLOSION_HIT, playerCharacter.getTrueX(),
                                 playerCharacter.getAttackingY(), -1);
                         numberForTestingSkills++;
@@ -930,6 +937,7 @@ public class MyGame extends ApplicationAdapter {
                 setDrawDarkTransparentScreen(true); // [5] enable drawing the dark transparent screen that makes other menus more visible
                 setDrawPauseMenu(false); // [8] disable drawing the pause menu
                 setDrawResultsMenu(true); // [9] enable drawing the results menu
+                showCaseALotOfMovingEnemies();
                 break;
             case LEVEL_UP:
                 // POTENTIAL PREVIOUS STATES: playing
